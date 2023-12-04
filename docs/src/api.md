@@ -1,20 +1,20 @@
-# [References](@id api)
+# [参考文献](@id api)
 
-## Contents
+## 内容
 ```@contents
 Pages = ["api.md"]
 Depth = 4
 ```
 
-## Index
+## 索引
 
 ```@index
 Pages = ["api.md"]
 ```
 
-## Public Interface
+## 公共接口
 
-### Plot specification
+### 图表规范
 ```@docs
 plot
 bbox
@@ -36,7 +36,7 @@ Modules = [Plots]
 Pages   = ["shorthands.jl"]
 ```
 
-### Animations
+### 动画
 ```@docs
 animate
 frame
@@ -48,7 +48,7 @@ webm
 @gif
 ```
 
-### Retriever
+### 检索器
 
 ```@docs
 current
@@ -59,7 +59,7 @@ backend_object
 plotattr
 ```
 
-### Output
+### 输出
 ```@docs
 display
 ```

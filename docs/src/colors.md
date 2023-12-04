@@ -1,64 +1,62 @@
-## Colors
+## 颜色
 
-There are many color attributes, for lines, fills, markers, backgrounds, and foregrounds.  Many colors follow a hierarchy... `linecolor` gets its value from `seriescolor`, for example, unless you override the value.  This allows for you to simply set precisely what you want, without lots of boilerplate.
+颜色属性有很多，包括线条、填充、标记、背景和前景的颜色。许多颜色遵循一个层级结构...例如，除非你覆盖这个值，否则`linecolor`会从`seriescolor`中获取其值。这让你能够精确地设置你想要的颜色，而不需要大量的样板代码。
 
-Color attributes will accept many different types:
+颜色属性可以接受许多不同类型：
 
-- `Symbol`s or `String`s will be passed to `Colors.parse(Colorant, c)`, so `:red` is equivalent to `colorant"red"`
-- `false` or `nothing` will be converted to an invisible `RGBA(0,0,0,0)`
-- Any `Colors.Colorant`, with or without alpha/opacity
-- Any `Plots.ColorScheme`, which includes `ColorVector`, `ColorGradient`, etc
-- An integer, which picks the corresponding color from the `seriescolor`
+- `Symbol`或`String`会被传递给`Colors.parse(Colorant, c)`，因此`:red`等同于`colorant"red"`
+- `false`或`nothing`会被转换为不可见的`RGBA(0,0,0,0)`
+- 任何带有或不带有alpha/透明度的`Colors.Colorant`
+- 任何`Plots.ColorScheme`，包括`ColorVector`，`ColorGradient`等
+- 整数，会从`seriescolor`中选择相应的颜色
 
-In addition, there is an extensive facility for selecting and generating color maps/gradients.
+此外，还有一个广泛的设施用于选择和生成颜色映射/渐变。
 
-- A valid Symbol: `:inferno` (the default), `:heat`, `:blues`, etc
-- A list of colors (or anything that can be converted to a color)
-- A pre-built `ColorGradient`, which can be constructed with the `cgrad` helper function.  See [this short tutorial](https://github.com/tbreloff/ExamplePlots.jl/blob/master/notebooks/cgrad.ipynb) for example usage.
+- 有效的Symbol：`:inferno`（默认），`:heat`，`:blues`等
+- 颜色列表（或可以转换为颜色的任何东西）
+- 预构建的`ColorGradient`，可以使用`cgrad`辅助函数来构造。例如使用方法，请参见[这个简短的教程](https://github.com/tbreloff/ExamplePlots.jl/blob/master/notebooks/cgrad.ipynb)。
 
-### Color names
-The supported color names is the union of [X11's](https://en.wikipedia.org/wiki/X11_color_names) and SVG's.
-They are defined in the [Colors.jl](https://github.com/JuliaGraphics/Colors.jl/blob/master/src/names_data.jl)
-,like `blue`, `blue2`, `blue3`, ...etc.
+### 颜色名称
+支持的颜色名称是[X11的](https://en.wikipedia.org/wiki/X11_color_names)和SVG的并集。
+它们在[Colors.jl](https://github.com/JuliaGraphics/Colors.jl/blob/master/src/names_data.jl)中定义，如`blue`，`blue2`，`blue3`...等。
 
 ---
 
-#### Series Colors
+#### 系列颜色
 
-For series, there are a few attributes to know:
+对于系列，有几个需要知道的属性：
 
-- **seriescolor**: Not used directly, but defines the base color for the series
-- **linecolor**: Color of paths
-- **fillcolor**: Color of area fill
-- **markercolor**: Color of the interior of markers and shapes
-- **markerstrokecolor**: Color of the border/stroke of markers and shapes
+- **seriescolor**：不直接使用，但定义了系列的基本颜色
+- **linecolor**：路径的颜色
+- **fillcolor**：填充区域的颜色
+- **markercolor**：标记和形状内部的颜色
+- **markerstrokecolor**：标记和形状边界/描边的颜色
 
-`seriescolor` defaults to `:auto`, and gets assigned a color from the `color_palette` based on its index in the subplot.  By default, the other colors `:match`.  (See the table below)
+`seriescolor`默认为`:auto`，并根据其在子图中的索引从`color_palette`中分配颜色。默认情况下，其他颜色为`:match`。（参见下表）
 
-!!! tip
-    In general, color gradients can be set by `*color`, and the corresponding color values to look up in the gradients by `*_z`.
+!!! 提示
+    通常，颜色渐变可以通过`*color`设置，对应的颜色值可以通过`*_z`在渐变中查找。
 
-This color... | matches this color...
+这个颜色... | 匹配这个颜色...
 --- | ---
 linecolor | seriescolor
 fillcolor | seriescolor
 markercolor | seriescolor
 markerstrokecolor | foreground_color_subplot
 
-!!! note
-    each of these attributes have a corresponding alpha override: `seriesalpha`, `linealpha`, `fillalpha`, `markeralpha`, and `markerstrokealpha`.  They are optional, and you can still give alpha information as part of an `Colors.RGBA`.
+!!! 注意
+    这些属性每一个都有一个对应的alpha覆盖：`seriesalpha`，`linealpha`，`fillalpha`，`markeralpha`和`markerstrokealpha`。它们是可选的，你仍然可以作为`Colors.RGBA`的一部分提供alpha信息。
 
-!!! note
-    In some contexts, and when the user hasn't set a value, the `linecolor` or `markerstrokecolor` may be overridden.
+!!! 注意
+    在某些情况下，如果用户没有设置值，`linecolor`或`markerstrokecolor`可能会被覆盖。
 
 ---
 
-#### Foreground/Background
+#### 前景/背景
 
-Foreground and background colors work similarly:
+前景和背景颜色的工作方式相似：
 
-
-This color... | matches this color...
+这个颜色... | 匹配这个颜色...
 --- | ---
 background\_color\_outside | background\_color
 background\_color\_subplot | background\_color
@@ -73,13 +71,12 @@ foreground\_color\_border  | foreground\_color\_subplot
 foreground\_color\_guide   | foreground\_color\_subplot
 foreground\_color\_text    | foreground\_color\_subplot
 
-
 ---
 
-#### Misc
+#### 其他
 
-- the `linecolor` under the default theme is not CSS-defined, but close to `:steelblue`.
-- `line_z` and `marker_z` parameters will map data values into a `ColorGradient` value
-- `color_palette` determines the colors assigned when `seriescolor == :auto`:
-    - If passed a vector of colors, it will force cycling of those colors
-    - If passed a gradient, it will infinitely draw unique colors from that gradient, attempting to spread them out
+- 默认主题下的`linecolor`并未在CSS中定义，但接近于`:steelblue`。
+- `line_z`和`marker_z`参数会将数据值映射到`ColorGradient`值
+- `color_palette`决定了`seriescolor == :auto`时分配的颜色：
+    - 如果传递了颜色向量，它将强制循环这些颜色
+    - 如果传递了渐变，它将无限地从该渐变中抽取唯一的颜色，试图将它们分散开

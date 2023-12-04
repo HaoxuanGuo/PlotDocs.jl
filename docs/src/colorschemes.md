@@ -1,12 +1,12 @@
 ```@setup colors
-using Plots; gr()
+使用 Plots; gr()
 Plots.reset_defaults()
 ```
 
-# Colorschemes
+# 颜色方案
 
-Plots supports all colorschemes from [ColorSchemes.jl](https://juliagraphics.github.io/ColorSchemes.jl/stable/basics/#Pre-defined-schemes-1).
-They can be used as a gradient or as a palette and are passed as a symbol holding their name to `cgrad` or `palette`.
+Plots 支持来自 [ColorSchemes.jl](https://juliagraphics.github.io/ColorSchemes.jl/stable/basics/#Pre-defined-schemes-1) 的所有颜色方案。
+它们可以作为渐变或调色板使用，并作为一个符号传递给 `cgrad` 或 `palette`。
 
 ```@example colors
 plot(
@@ -26,10 +26,10 @@ heatmap(x, x, f, c = :thermal)
 
 ### ColorPalette
 
-Plots chooses colors for series automatically from the palette passed to the `color_palette` attribute.
-The attribute accepts symbols of colorscheme names or `ColorPalette` objects.
-Color palettes can be constructed with `palette(cs, [n])` where `cs` can be a `Symbol`, a vector of colors, a `ColorScheme`, `ColorPalette` or `ColorGradient`.
-The optional argument `n` decides how many colors to choose from `cs`.
+Plots 会自动从传递给 `color_palette` 属性的调色板中选择系列的颜色。
+该属性接受颜色方案名称的符号或 `ColorPalette` 对象。
+颜色调色板可以用 `palette(cs, [n])` 构建，其中 `cs` 可以是 `Symbol`，颜色向量，`ColorScheme`，`ColorPalette` 或 `ColorGradient`。
+可选参数 `n` 决定从 `cs` 中选择多少种颜色。
 
 ```@example colors
 palette(:tab10)
@@ -41,44 +41,44 @@ palette([:purple, :green], 7)
 
 ### ColorGradient
 
-For `heatmap`, `surface`, `contour` or `line_z`, `marker_z` and `line_z` Plots.jl chooses colors from a `ColorGradient`.
-If not specified, the default `ColorGradient` `:inferno` is used.
-A different gradient can be selected by passing a symbol for a colorscheme name to the `seriescolor` attribute.
-For more detailed configuration, the color attributes also accept a `ColorGradient` object.
-Color gradients can be constructed with
+对于 `heatmap`，`surface`，`contour` 或 `line_z`，`marker_z` 和 `line_z`，Plots.jl 从 `ColorGradient` 中选择颜色。
+如果未指定，将使用默认的 `ColorGradient` `:inferno`。
+可以通过将颜色方案名称的符号传递给 `seriescolor` 属性来选择不同的渐变。
+对于更详细的配置，颜色属性也接受 `ColorGradient` 对象。
+颜色渐变可以用以下方式构建
 ```julia
 cgrad(cs, [z], alpha = nothing, rev = false, scale = nothing, categorical = nothing)
 ```
-where `cs` can be a `Symbol`, a vector of colors, a `ColorScheme`, `ColorPalette` or `ColorGradient`.
+其中 `cs` 可以是 `Symbol`，颜色向量，`ColorScheme`，`ColorPalette` 或 `ColorGradient`。
 
 ```@example colors
 cgrad(:acton)
 ```
-You can pass a vector of values between 0 and 1 as second argument to specify positions of color transitions.
+您可以将值在 0 和 1 之间的向量作为第二个参数传递，以指定颜色过渡的位置。
 ```@example colors
 cgrad([:orange, :blue], [0.1, 0.3, 0.8])
 ```
-With `rev = true` the colorscheme colors are reversed.
+使用 `rev = true` 可以反转颜色方案的颜色。
 ```@example colors
 cgrad(:thermal, rev = true)
 ```
-Setting `categorical = true` returns a `CategoricalColorGradient` that only chooses from a discrete set of colors without interpolating continuously.
-The optional second argument determines how many colors to choose from the colorscheme.
-They are distributed uniformly along the colorscheme colors.
+设置 `categorical = true` 返回一个 `CategoricalColorGradient`，它只从离散的颜色集中选择颜色，而不是连续插值。
+可选的第二个参数决定从颜色方案中选择多少种颜色。
+它们沿着颜色方案的颜色均匀分布。
 ```@example colors
 cgrad(:matter, 5, categorical = true)
 ```
-Categorical gradients also accept a vector for positions of color transitions and can be reversed.
+分类渐变也接受颜色过渡位置的向量，并且可以反转。
 ```@example colors
 cgrad(:matter, [0.1, 0.3, 0.8], rev = true, categorical = true)
 ```
-The distribution of color selection can be scaled with the `scale` keyword argument which accepts `:log`, `:log10`, `:ln`, `:log2`, `:exp` or a function to be applied on the color position values between 0 and 1.
+颜色选择的分布可以使用接受 `:log`，`:log10`，`:ln`，`:log2`，`:exp` 或应用于 0 和 1 之间的颜色位置值的函数的 `scale` 关键字参数进行缩放。
 ```@example colors
 cgrad(:roma, scale = :log)
 ```
-Categorical gradients can also be scaled.
+分类渐变也可以进行缩放。
 ```@example colors
 cgrad(:roma, 10, categorical = true, scale = :exp)
 ```
 
-# Pre-defined ColorSchemes
+# 预定义的颜色方案

@@ -1,109 +1,103 @@
-```@setup contributing
-using Plots; gr()
-Plots.reset_defaults()
-```
+这是一份关于如何为Plots及其周边生态系统做出贡献的指南。Plots是一套复杂且覆盖广泛的软件组件，因此，当社区贡献他们自己的专业知识、知识、观点和努力时，它会更加有效。本文档大致分为以下几个类别，阅读完这个介绍后，你应该能够自由跳转到你最感兴趣的部分：
 
-This is a guide to contributing to Plots and the surrounding ecosystem. Plots is a complex and far-reaching suite of software components, and as such will be most effective when the community contributes their own expertise, knowledge, perspective, and effort. The document is roughly broken up into the following categories, and after reading this introduction you should feel comfortable skipping to the section(s) that interest you the most:
+- [JuliaPlots 组织](#JuliaPlots-组织)：包和依赖项
+- [选择一个项目](#选择一个项目)：修复错误，添加功能，创建配方
+- [关键设计原则](#关键设计原则)：设计目标和考虑因素
+- [代码组织](#代码组织)：在实现新功能时应该查看哪些内容
+- [Git-fu (或者说...贡献的机制)](#Git-fu-(或者说...贡献的机制))：Git（如何提交/推送），Github（如何提交PR），测试（VisualRegressionTests，Travis）
 
-- [The JuliaPlots Organization](#The-JuliaPlots-Organization): Packages and dependencies
-- [Choosing a Project](#Choosing-a-Project): Fix bugs, add features, create recipes
-- [Key Design Principles](#Key-Design-Principles): Design goals and considerations
-- [Code Organization](#Code-Organization): Where to look when implementing new features
-- [Git-fu (or... the mechanics of contributing)](#Git-fu-(or...-the-mechanics-of-contributing)): Git (how to commit/push), Github (how to submit a PR), Testing (VisualRegressionTests, Travis)
-
-When in doubt, use this handy dandy logic designed by a [legendary open source guru](https://github.com/tbreloff)...
+如果有疑问，可以使用由[开源大牛](https://github.com/tbreloff)设计的这个方便的逻辑...
 
 ![](https://cloud.githubusercontent.com/assets/933338/23193321/4cd1d578-f876-11e6-92dc-222b52598054.png)
 
 ---
 
-## The JuliaPlots Organization
+## JuliaPlots 组织
 
-[JuliaPlots](https://github.com/JuliaPlots) is the home for all things Plots. It was founded by [Tom Breloff](https://www.breloff.com), and extended through many contributions from [members](https://github.com/orgs/JuliaPlots/people) and others.  The first step in contributing will be to understand which package(s) are appropriate destinations for your code.
-
+[JuliaPlots](https://github.com/JuliaPlots)是所有关于Plots的事情的家。它由[Tom Breloff](https://www.breloff.com)创立，并通过许多来自[成员](https://github.com/orgs/JuliaPlots/people)和其他人的贡献进行扩展。第一步贡献将是了解哪个包或哪些包是你的代码的合适去处。
 
 ### Plots
 
-This is the core package for:
+这是以下核心包：
 
-- Definitions of `plot`/`plot!`
-- The [core processing pipeline](@ref pipeline)
-- Base [recipes](@ref recipes) for `path`, `scatter`, `bar`, and many others
-- Generic [output](@ref output) methods
-- Generic [layout](@ref layouts) methods
-- Generic [animation](@ref animations) methods
-- Generic types: Plot, Subplot, Axis, Series, ...
-- Conveniences: `getindex`/`setindex`, `push!`/`append!`, `unzip`, `cycle`, ...
+- `plot`/`plot!`的定义
+- [核心处理管道](@ref pipeline)
+- `path`、`scatter`、`bar`等的基本[配方](@ref recipes)
+- 通用的[输出](@ref output)方法
+- 通用的[布局](@ref layouts)方法
+- 通用的[动画](@ref animations)方法
+- 通用类型：Plot，Subplot，Axis，Series，...
+- 便利方法：`getindex`/`setindex`，`push!`/`append!`，`unzip`，`cycle`，...
 
-This package depends on RecipesBase, PlotUtils, and PlotThemes.  When contributing new functionality/features, you should make best efforts to find a more appropriate home (StatsPlots, PlotUtils, etc) than contributing to core Plots. In general, the push has been to reduce the size and scope of Plots, when possible, and move features to other packages.
+此包依赖于RecipesBase，PlotUtils和PlotThemes。在贡献新的功能/特性时，你应该尽力找到一个更合适的家（比如StatsPlots，PlotUtils等），而不是直接贡献给核心的Plots。一般来说，我们一直在努力减小Plots的大小和范围，并将特性移动到其他包中。
 
-### Backends
+### 后端
 
-Backend code (such as code linking Plots with GR) lives in the `Plots/src/backends` directory. As such, backend code should be contributed to core Plots. GR and Plotly are the only backends installed by default. All other backend code is loaded conditionally using [Requires.jl](https://github.com/JuliaPackaging/Requires.jl) in `Plots/src/init.jl`.
+后端代码（例如链接Plots和GR的代码）位于`Plots/src/backends`目录中。因此，后端代码应贡献给核心的Plots。GR和Plotly是默认安装的唯一后端。所有其他后端代码都是使用[Requires.jl](https://github.com/JuliaPackaging/Requires.jl)在`Plots/src/init.jl`中有条件地加载的。
 
 ### PlotDocs
 
-PlotDocs is the home of this documentation. The documentation is built using [Documenter.jl](https://github.com/JuliaDocs/Documenter.jl).
+PlotDocs是此文档的主页。文档是使用[Documenter.jl](https://github.com/JuliaDocs/Documenter.jl)构建的。
 
 ### RecipesBase
 
-Seldom updated, but essential. This is the package that you would depend on to create third-party recipes. It contains the bare minimum to define new recipes.
+更新不频繁，但是必不可少。这是你创建第三方配方时需要依赖的包。它包含定义新配方所需的最基本内容。
 
 ### PlotUtils
 
-Components that could be used for other (non-Plots) packages. Anything that is sufficiently generic and useful could be contributed here.
+可以用于其他（非Plots）包的组件。任何足够通用且有用的东西都可以贡献到这里。
 
-- Color (conversions, construction, conveniences)
-- Color gradients/maps
-- Tick computation
+- 颜色（转换，构造，便利方法）
+- 颜色渐变/映射
+- 刻度计算
 
 ### PlotThemes
 
-Visual themes (i.e. attribute defaults) such as "dark", "orange", etc.
+视觉主题（即属性默认值），例如"dark"，"orange"等。
 
 ### StatsPlots
 
-An extension of Plots: Statistical plotting and tabular data.  Complex histograms and densities, correlation plots, and support for DataFrames.  Anything related to stats or special handling for table-like data should live here.
+Plots的扩展：统计图形和表格数据。复杂的直方图和密度图，相关图，以及对DataFrames的支持。任何与统计相关或对表格数据的特殊处理都应在此处。
 
 ### GraphRecipes
 
-An extension of StatsPlots: Graphs, maps, and more.
+StatsPlots的扩展：图形，地图等。
 
 ---
 
-## Choosing a Project
+## 选择一个项目
 
-For people new to Plots, the first step should be to read (and reread) the documentation.  Code up some examples, play with the attributes, and try out multiple backends. It's really hard to contribute to a project that you don't know how to use.
+对于新接触Plots的人来说，第一步应该是阅读（和重读）文档。编写一些示例，玩玩属性，试试多种后端。如果你不知道如何使用一个项目，那么为这个项目做贡献就很困难。
 
-### Beginner Project Ideas
+### 初级项目想法
 
-- **Create a new recipe**: Preferably something you care about.  Maybe you want custom overlays of heatmaps and scatters?  Maybe you have an input format that isn't currently supported?  Make a recipe for it so you can just `plot(thing)`.
-- **Fix bugs**: There are many "bugs" which are specific to one backend, or incorrectly implement features that are infrequently used.  Some ideas can be found in the [issues marked easy](https://github.com/JuliaPlots/Plots.jl/issues?q=is%3Aissue+is%3Aopen+label%3A%22easy+-+up+for+grabs%22).
-- **Add recipes to external packages**: By depending on RecipesBase, a package can define a recipe for their custom types.  Submit a PR to a package you care about that adds a recipe for that package.  For example, see [this PR to add OHLC plots for TimeSeries.jl](https://github.com/JuliaStats/TimeSeries.jl/pull/303).
+- **创建一个新的配方**：最好是你关心的东西。也许你想要热图和散点的自定义覆盖？也许你有一个目前不支持的输入格式？为此创建一个配方，这样你可以只用`plot(thing)`来画图。
+- **修复错误**：有很多"错误"是特定于一个后端的，或者是错误实现了一些不常用的特性。一些想法可以在[标记为easy的问题](https://github.com/JuliaPlots/Plots.jl/issues?q=is%3Aissue+is%3Aopen+label%3A%22easy+-+up+for+grabs%22)中找到。
+- **向外部包添加配方**：通过依赖RecipesBase，一个包可以为其自定义类型定义一个配方。向你关心的包提交一个PR，为该包添加一个配方。例如，看看[这个为TimeSeries.jl添加OHLC图的PR](https://github.com/JuliaStats/TimeSeries.jl/pull/303)。
 
-### Intermediate Project Ideas
+### 中级项目想法
 
-- **Improve your favorite backend**: There are many missing features and other improvements that can be made to individual backends.  Most issues specific to a backend have a [special tag](https://github.com/JuliaPlots/Plots.jl/issues?q=is%3Aissue+is%3Aopen+label%3APlotly).
-- **Help with documentation**: This could come in the form of improved descriptions, additional examples, or full tutorials.  Please contribute improvements to [PlotDocs](https://github.com/JuliaPlots/PlotDocs.jl).
-- **Expand StatsPlots functionality**:  qqplot, DataStreams, or anything else you can think of.
+- **改进你最喜欢的后端**：可以对各个后端进行许多缺失的特性和其他改进。大多数特定于一个后端的问题都有一个[特殊标签](https://github.com/JuliaPlots/Plots.jl/issues?q=is%3Aissue+is%3Aopen+label%3APlotly)。
+- **帮助文档**：这可能以改进描述、额外的示例或完整的教程的形式出现。请向[PlotDocs](https://github.com/JuliaPlots/PlotDocs.jl)贡献改进内容。
+- **扩展StatsPlots的功能**：qqplot，DataStreams，或你能想到的其他任何东西。
 
-### Advanced Project Ideas
+### 高级项目想法
 
-- **ColorBar redesign**: Colorbars [need serious love](https://github.com/JuliaPlots/Plots.jl/issues?utf8=%E2%9C%93&q=is%3Aissue%20is%3Aopen%20colorbar)... this would likely require a new Colorbar type that links with the appropriate Series object(s) and is independent during subplot layout.  We want to allow many series (possibly from multiple subplots) to use the same clims and to share a colorbar, or have multiple colorbars that can be flexibly positioned.
-- **PlotSpec redesign**: This [long standing redesign proposal](https://github.com/JuliaPlots/Plots.jl/issues/390) could allow generic serialization/deserialization of Plot data and attributes, as well as some improvements/optimizations when mutating plots.  For example, we could lazily compute attribute values, and intelligently flag them as "dirty" when they change, allowing backends to skip much of the wasted processing and unnecessary rebuilding that currently occurs.
-- **Improve graph recipes**: Lots to do here: clean up visuals, improve edge drawing, implement [layout algorithms](https://github.com/JuliaGraphs/NetworkLayout.jl), and much more.
+- **ColorBar重新设计**：Colorbars [需要大量的照顾](https://github.com/JuliaPlots/Plots.jl/issues?utf8=%E2%9C%93&q=is%3Aissue%20is%3Aopen%20colorbar)...这可能需要一个新的Colorbar类型，该类型与相应的Series对象链接，并在subplot布局时独立。我们希望允许许多系列（可能来自多个subplot）使用相同的clims并共享一个colorbar，或者有多个colorbar可以灵活地定位。
+- **PlotSpec重新设计**：这个[长期存在的重新设计提案](https://github.com/JuliaPlots/Plots.jl/issues/390)可以允许通用的序列化/反序列化Plot数据和属性，以及在突变图表时的一些改进/优化。例如，我们可以延迟计算属性值，并在它们改变时智能地标记它们为"dirty"，允许后端跳过大部分浪费的处理和当前发生的不必要的重建。
+- **改进图形配方**：这里有很多事情要做：清理视觉效果，改进边缘绘制，实现[布局算法](https://github.com/JuliaGraphs/NetworkLayout.jl)，等等。
 
 ---
 
-## Key Design Principles
+## 关键设计原则
 
-Flexible and generic... these are the core principles underlying Plots development, and also tend to cause confusion when users laser-focus on their specific use case.
+灵活和通用...这些是Plots开发的核心原则，也往往会在用户过分关注他们特定的用例时引起混淆。
 
-I (Tom) have painstakingly designed the core logic to support nearly any use case that exists or may exist.  I don't pretend to know how you want to use Plots, or what type of data you might pass in, or what sort of recipe you may want to apply.  As such, I try to avoid unnecessary restriction of types, or forced conversions, or many other pitfalls of limited visualization frameworks.  The result is a highly modular framework which is limited by your imagination.
+我（Tom）已经精心设计了核心逻辑，以支持几乎所有存在的或可能存在的用例。我不假设你想如何使用Plots，或你可能传入什么类型的数据，或你可能想应用什么类型的配方。因此，我尽量避免不必要的类型限制，或强制转换，或许多其他有限的可视化框架的陷阱。结果是一个高度模块化的框架，只受你的想象力的限制。
 
-When contributing new features to Plots (or the surrounding ecosystem), you should strive for this mentality as well.  New features should be left as generic as possible, while avoiding obvious feature clash.
+当为Plots（或周围的生态系统）贡献新特性时，你也应该追求这种心态。新功能应尽可能保持通用，同时避免明显的特性冲突。
 
-As an example, you may want a new recipe that shows a histogram when passed Float64 numbers, but shows counts of every unique value for strings.  So you make a recipe that works perfectly for your purpose:
+例如，你可能想要一个新的配方，当传入Float64数字时显示直方图，但对于字符串，则显示每个唯一值的计数。所以你制作了一个完美适合你目的的配方：
 
 ```@example contributing
 using Plots, StatsBase
@@ -128,7 +122,7 @@ gr(size = (300, 300), leg = false)
 end
 ```
 
-The recipe defined above is a "user recipe", which builds a histogram for arrays of Float64, and otherwise shows a "countmap" of sorted unique values and their observed counts.  You only care about Float64 and String, and so you're results are fine:
+上面定义的配方是一个"用户配方"，它为Float64数组构建直方图，否则显示排序的唯一值和它们观察到的计数的"countmap"。你只关心Float64和String，所以你的结果是好的：
 
 ```@example contributing
 mycount(rand(500))
@@ -138,81 +132,81 @@ mycount(rand(500))
 mycount(rand(["A","B","C"],100))
 ```
 
-But you didn't consider the person that, in the future, might want to pass integers to this recipe:
+但是你没有考虑到未来可能想要将整数传递给这个配方的人：
 
 ```@example contributing
 mycount(rand(1:500, 500))
 ```
 
-This user expected integers to be treated as numbers and output a histogram, but instead they were treated like strings.  A simple solution would have been to replace `if T.parameters[1] == Float64` with `if T.parameters[1] <: Number`.  However, should we even depend on `T` having it's first parameter be the element type? (No)  So even better would be `if eltype(arr) <: Number`, which now allows any container with any numeric type to trigger the "histogram" logic.
+这个用户期望整数被视为数字并输出直方图，但是它们被视为字符串。一个简单的解决方案是将`if T.parameters[1] == Float64`替换为`if T.parameters[1] <: Number`。然而，我们甚至应该依赖`T`的第一个参数是元素类型吗？（不）所以更好的是`if eltype(arr) <: Number`，这现在允许任何包含任何数字类型的容器触发"直方图"逻辑。
 
-This simple example outlines a common theme when developing Plots (or really any other Julia package).  Try to create the most generic implementation you can think of while maintaining correctness.  You don't know what crazy types someone else will use to try to access your functionality.
-
----
-
-## Code Organization
-
-Generally speaking, similar functionality is kept within the same file.  Within the `src` directory, much of the files should be self explanatory (for example, you'll find animation methods/macros in the `animation.jl` file), but some could use a summary of contents:
-
-- `Plots.jl`: imports, exports, shorthands, and initialization
-- `args.jl`: defaults, aliases, and attribute processing
-- `components.jl`: shapes, fonts, and other assorted goodies
-- `pipeline.jl`: code which builds the plots and subplots through recursive application of recipes
-- `recipes.jl`: primarily core series recipes
-- `series.jl`: core input data handling and processing
-- `utils.jl`: lots of functionality that didn't have a home... `getindex`/`setindex!` for `Plot`/`Subplot`/`Axis`/`Series`, `push!`/`append!` for adding data to a series, `cycle`/`unzip` and similar utility functions, `Segments`/`SegmentsIterator`, etc.
-
-These files should probably be reorganized, but until then...
-
-### Creating new backends
-
-Model new backends on `Plots/src/backends/template.jl`. Implement the callbacks that are appropriate, especially `_display` and `_show` for GUI and image output respectively.
-
-### Style/Design Guidelines
-
-- Make every effort to minimize external dependencies and exports.  Requiring new dependencies is the most likely way to make your PR "unmergeable".
-- Be careful adding method signatures on existing methods with Base types (Array, etc) as you may override key functionality.  This is especially true with recipes.  Consider wrapping inputs in a new type (like in "user recipes").
-- Terse code is ok, as is verbose code.  What's important is understanding and context.  Will someone reading your code know what you mean?  If not, consider writing comments to describe your reason for the design, or describe the hack you just implemented in clear prose.  Sometimes [it's ok that your comments are longer than your code](https://github.com/JuliaPlots/Plots.jl/blob/master/src/pipeline.jl#L62-L67).
-- Pick your project for yourself, but write code for others.  It should be generic and useful beyond your needs, and you should **never break functionality** because you can't figure out how to implement something well.  Spend more time on it... there's always a better way.
+这个简单的例子概述了在开发Plots（或真正任何其他Julia包）时的一个常见主题。尝试创建你能想到的最通用的实现，同时保持正确性。你不知道其他人会使用什么疯狂的类型来尝试访问你的功能。
 
 ---
 
-## Git-fu (or... the mechanics of contributing)
+## 代码组织
 
-Many people have trouble with Git.  More have trouble with Github.  I think much of the confusion happens when you run commands without understanding what they do.  We're all guilty of it, but recovering usually means "starting over".  In this section, I'll try to keep a simple, practical approach to making PRs.  It's worked well for me, though YMMV.
+一般来说，相类似的功能被保留在同一个文件中。在`src`目录中，大多数文件应该是不言自明的（例如，你会在`animation.jl`文件中找到动画方法/宏），但有些可能需要一个内容概要：
 
-### Guidelines
+- `Plots.jl`：导入，导出，简写和初始化
+- `args.jl`：默认值，别名和属性处理
+- `components.jl`：形状，字体和其他各种好东西
+- `pipeline.jl`：通过递归应用配方来构建图表和子图的代码
+- `recipes.jl`：主要是核心系列配方
+- `series.jl`：核心输入数据处理和处理
+- `utils.jl`：许多没有家的功能... `getindex`/`setindex!`用于`Plot`/`Subplot`/`Axis`/`Series`，`push!`/`append!`用于向系列添加数据，`cycle`/`unzip`和类似的实用程序函数，`Segments`/`SegmentsIterator`等。
 
-Here are some guidelines for the development workflow (Note: Even if you've made 20 PRs to Plots in the past, please read this as it may be different than past guidelines):
+这些文件可能需要重新组织，但在此之前...
 
-- **Commit to a branch that belongs to you.**  Typically that means you should give your branches names that are unique to you, and that might include information on the feature you're developing.  For example, I might choose to `git checkout -b tb-fonts` when starting work on fonts.
-- **Open a PR against master.**  `master` is the "bleeding edge".  (Note: I used to recommend PRing to `dev`)
-- **Only merge others changes when absolutely necessary.** You should prefer to use `git rebase origin/master` instead of `git merge origin/master`.  A rebase replays your recent commits on top of the most recent `master`, avoiding complicated and messy merge commits and generally avoiding confusion.  If you follow the first rule, then you likely won't get yourself in trouble.  Rebase horror stories generally result when many people are working on the same branch.  I find [this resource](https://git-scm.com/book/en/v2/Git-Branching-Rebasing) is great for understanding the important parts of `git rebase`.
+### 创建新的后端
+
+根据`Plots/src/backends/template.jl`模型创建新的后端。实现适当的回调，尤其是`_display`和`_show`，分别用于GUI和图像输出。
+
+### 样式/设计指南
+
+- 尽一切努力最小化外部依赖和导出。要求新的依赖关系是使你的PR"无法合并"的最可能的方式。
+- 在添加Base类型（Array等）的现有方法的方法签名时要小心，因为你可能会覆盖关键功能。这对于配方尤其正确。考虑将输入包装在新类型中（如在"用户配方"中）。
+- 简洁的代码是可以的，冗长的代码也是可以的。重要的是理解和上下文。读你的代码的人会知道你的意思吗？如果不是，考虑写注释来描述你的设计理由，或用清晰的散文描述你刚刚实现的黑客。有时候[你的注释比你的代码更长是没问题的](https://github.com/JuliaPlots/Plots.jl/blob/master/src/pipeline.jl#L62-L67)。
+- 为自己选择项目，但为他人编写代码。它应该超出你的需要而具有通用性和实用性，你永远不应该**因为你无法弄清楚如何实现某件事而破坏功能**。花更多的时间在它上面...总有一个更好的方法。
 
 ---
 
-### Development Workflow
+## Git-fu (或者说...贡献的机制)
 
-My suggestions for a smooth development workflow:
+许多人对Git有困扰。更多的人对Github有困扰。我认为大部分的混乱发生在你运行命令但不理解它们做什么时。我们都有这个问题，但恢复通常意味着"重新开始"。在这一节中，我将尽量保持对创建PR的简单、实用的方法。这对我来说效果很好，尽管你的情况可能会有所不同。
 
-#### Fork the repo
+### 指南
 
-Navigate to the repo site (https://github.com/JuliaPlots/Plots.jl) and click the "Fork" button.  You might get a choice of which account or organization to place the fork.  I'll assume going forward that you forked to Github username `user123`.
+以下是开发工作流程的一些指南（注意：即使你过去已经为Plots做过20个PR，也请阅读这个，因为它可能与过去的指南有所不同）：
 
-#### Set up the git remote
+- **提交到你自己的分支。** 通常这意味着你应该给你的分支一个对你来说是唯一的名字，可能包括你正在开发的特性的信息。例如，当我开始处理字体时，我可能会选择`git checkout -b tb-fonts`。
+- **对master开放一个PR。** `master`是"前沿"。 （注意：我过去建议对`dev`进行PR）
+- **只有在绝对必要时才合并其他人的更改。** 你应该更喜欢使用`git rebase origin/master`而不是`git merge origin/master`。一个rebase将你的最近提交重播到最新的`master`上，避免复杂和混乱的合并提交，并通常避免混乱。如果你遵循第一个规则，那么你可能不会给自己带来麻烦。Rebase的恐怖故事通常是当许多人在同一个分支上工作时发生的。我发现[这个资源](https://git-scm.com/book/en/v2/Git-Branching-Rebasing)非常适合理解`git rebase`的重要部分。
 
-Navigate to the local repo.  Note: I'm assuming that you do development in your Julia directory, and using Mac/Linux.  Adjust as needed.
+---
+
+### 开发工作流程
+
+我的建议是一个顺畅的开发工作流程：
+
+#### Fork仓库
+
+导航到仓库网站（https://github.com/JuliaPlots/Plots.jl）并点击"Fork"按钮。你可能会得到一个选择将fork放在哪个账户或组织的选择。接下来我将假设你fork到了Github用户名为`user123`的地方。
+
+#### 设置git远程
+
+导航到本地仓库。注意：我假设你在Julia目录中进行开发，并使用Mac/Linux。根据需要进行调整。
 
 ```
 cd ~/.julia/v0.5/Plots
 git remote add forked git@github.com:user123/Plots.jl.git
 ```
 
-After running these commands, `git remote -v` should show two remotes: `origin` (the main repo) and `forked` (your fork).  A remote is simply a reference/pointer to the github site hosting the repo, and a fork is simply any other git repo with a special link to the originating repo.
+运行这些命令后，`git remote -v`应显示两个远程：`origin`（主仓库）和`forked`（你的fork）。一个远程仅仅是指向托管仓库的github网站的引用/指针，而一个fork就是任何其他与原始仓库有特殊链接的git仓库。
 
-#### Create a new branch
+#### 创建一个新的分支
 
-If you're just starting work on a new feature:
+如果你刚开始为一个新特性工作：
 
 ```
 git fetch origin
@@ -222,11 +216,11 @@ git checkout -b user123-myfeature
 git push -u forked user123-myfeature
 ```
 
-The first three lines are meant to ensure you start from the main repo's master branch.  The `--ff-only` flag ensures you will only "fast forward" to newer commits, and avoids creating a new merge commit when you didn't mean to.  The `git checkout` line both creates a new branch (the `-b`) pointing to the current commit and makes that branch current.  The `git push` line adds this branch to your Github fork, and sets up the local branch to "track" (`-u`) the remote branch for subsequent `git push` and `git pull` calls.
+前三行是确保你从主仓库的master分支开始。`--ff-only`标志确保你只会"快进"到较新的提交，并避免在你不打算这样做时创建一个新的合并提交。`git checkout`行既创建一个新的分支（`-b`），也指向当前提交，并使该分支为当前。`git push`行将这个分支添加到你的Github fork，并设置本地分支来"跟踪"（`-u`）远程分支，以便后续的`git push`和`git pull`调用。
 
-#### or... Reuse an old branch
+#### 或者...重用一个旧的分支
 
-If you have an ongoing development branch (say, `user123-dev`) which you'd prefer to use (and which has previously been merged into master!) then you can get that up to date with:
+如果你有一个正在进行的开发分支（比如，`user123-dev`），你更愿意使用（并且已经被合并到master！）那么你可以用以下方式将其更新：
 
 ```
 git fetch origin
@@ -235,20 +229,20 @@ git merge --ff-only origin/master
 git push forked user123-dev
 ```
 
-We update our local copy of origin, checkout the dev branch, then attempt to "fast-forward" to the current master.  If successful, we push the branch back to our forked repo.
+我们更新我们的origin的本地副本，检出dev分支，然后尝试"快进"到当前的master。如果成功，我们将分支推回到我们fork的仓库。
 
-#### Write code, and format
+#### 编写并格式化代码
 
-Power up your favorite editor (maybe [Juno](https://junolab.org/)?) and make some code changes to the repo.
+启动你最喜欢的编辑器（也许是 [Juno](https://junolab.org/)？）并对仓库进行一些代码更改。
 
-Format your changes (code style consistency) using:
+使用以下命令格式化你的更改（保持代码风格的一致性）：
 ```bash
 $ julia -e 'using JuliaFormatter; format(["src", "test"])'
 ```
 
-#### Commit
+#### 提交
 
-After applying changes, you'll want to "commit" or save a snapshot of all the changes you made.  After committing, you can "push" those changes to your forked repo on Github:
+在应用更改后，你会想要 "提交" 或保存你所做的所有更改的快照。提交后，你可以将这些更改 "推送" 到你在 Github 上的 forked 仓库：
 
 ```
 git add src/my_new_file.jl
@@ -256,17 +250,17 @@ git commit -am "my commit message"
 git push forked user123-dev
 ```
 
-The first line is optional, and is used when adding new files to the repo.  The `-a` means "commit all my changes", and the `-m` lets you write a note about the commit (you should always do this, and hopefully make it descriptive).
+第一行是可选的，当向仓库添加新文件时使用。`-a` 表示 "提交我所有的更改"，`-m` 允许你写一个关于提交的注释（你应该总是这样做，并希望让它具有描述性）。
 
-#### Submit a PR
+#### 提交 PR
 
-You're almost there!  Browse to your fork (https://github.com/user123/Plots.jl).  Most likely there will be a section just above the code that asks if you'd like to create a PR from the `user123-dev` branch.  If not, you can click the "New pull request" button.
+你快到了！浏览你的 fork (https://github.com/user123/Plots.jl)。最有可能的是，在代码上方会有一个区域询问你是否希望从 `user123-dev` 分支创建 PR。如果没有，你可以点击 "New pull request" 按钮。
 
-Make sure the "base" branch is JuliaPlots `master` and the "compare" branch is `user123-dev`.  Add an informative title and description, and link to relevant issues or discussions, then click "Create pull request".  You may get some questions about it, and possibly suggestions of how to fix it to be "merge-ready".  Then hopefully it gets merged... thanks for the contribution!!
+确保 "base" 分支是 JuliaPlots 的 `master`，"compare" 分支是 `user123-dev`。添加一个信息丰富的标题和描述，并链接到相关的问题或讨论，然后点击 "Create pull request"。你可能会收到一些关于它的问题，可能还有一些关于如何修复它以便 "合并准备就绪" 的建议。然后，希望它能被合并...感谢你的贡献！！
 
-#### Cleanup
+#### 清理
 
-After all of this, you will likely want to go back to using `master` (or possibly using a tagged release, once your feature is tagged).  To clean up:
+在所有这些之后，你可能会想要回到使用 `master`（或可能在你的特性被标记后使用一个标记的发布）。清理如下：
 
 ```
 git fetch origin
@@ -275,29 +269,29 @@ git merge --ff-only origin/master
 git branch -d user123-dev
 ```
 
-This catches your local master branch up to the remote master branch, then deletes the dev branch.  If you want to return to tagged releases, run `Pkg.free("Plots")` from the Julia REPL.
+这将你的本地 master 分支与远程 master 分支同步，然后删除 dev 分支。如果你想要返回到标记的发布，从 Julia REPL 运行 `Pkg.free("Plots")`。
 
 ---
 
-### Tags
+### 标签
 
-New tags should represent "stable releases"... those that you are happy to distribute to end-users.  Effort should be made to ensure tests pass before creating a new tag, and ideally new tests would be added which test your new functionality.  This is, of course, a much trickier problem for visualization libraries as compared to other software.  See the [testing section](#testing) below.
+新的标签应代表 "稳定的发布"...那些你愿意分发给终端用户的。在创建新标签之前，应尽力确保测试通过，理想情况下，应添加新的测试以测试你的新功能。当然，对于可视化库来说，这比其他软件更棘手。请参阅下面的 [测试部分](#testing)。
 
-Only JuliaPlots members may create a new tag.  To create a new tag, we'll create a new release on Github and use [attobot](https://github.com/attobot/attobot) to generate the PR to METADATA.  Create a new release at https://github.com/JuliaPlots/Plots.jl/releases/new (of course replacing the repo name with the package you're tagging).
+只有 JuliaPlots 成员才能创建新的标签。为了创建一个新的标签，我们将在 Github 上创建一个新的发布，并使用 [attobot](https://github.com/attobot/attobot) 来生成 PR 到 METADATA。在 https://github.com/JuliaPlots/Plots.jl/releases/new 创建一个新的发布（当然要将仓库名替换为你正在标记的包名）。
 
-The version number (vMAJOR.MINOR.PATCH) should be incremented using [semver](https://semver.org/), which generally means that breaking changes should increment the major number, backwards compatible changes should increment the minor number, and bug fixes should increment the patch number.  For "v0.x.y" versions, this requirement is relaxed.  The minor version can be incremented for breaking changes.
+版本号（vMAJOR.MINOR.PATCH）应使用 [semver](https://semver.org/) 进行增加，这通常意味着破坏性的更改应增加主要的数字，向后兼容的更改应增加次要的数字，而错误修复应增加补丁的数字。对于 "v0.x.y" 版本，这个要求被放宽。次要版本可以因为破坏性的更改而增加。
 
 ---
 
-### Testing
+### 测试
 
 #### VisualRegressionTests
 
-Testing in Plots is done with the help of [VisualRegressionTests](https://github.com/JuliaPlots/VisualRegressionTests.jl).  Reference images are stored in [PlotReferenceImages](https://github.com/JuliaPlots/PlotReferenceImages.jl). Sometimes the reference images need to be updated (if features change, or if the underlying backend changes).  VisualRegressionTests makes it somewhat painless to update the reference images:
+在 Plots 中，我们使用 [VisualRegressionTests](https://github.com/JuliaPlots/VisualRegressionTests.jl) 进行测试。参考图像存储在 [PlotReferenceImages](https://github.com/JuliaPlots/PlotReferenceImages.jl) 中。有时候需要更新参考图像（如果特性改变，或者底层后端改变）。VisualRegressionTests 使得更新参考图像相当简单：
 
-From the Julia REPL, run `Pkg.test(name="Plots")`.  This will try to plot the tests, and then compare the results to the stored reference images.  If the test output is sufficiently different than the reference output (using Tim Holy's excellent algorithm for the comparison), then a GTK window will pop up with a side-by-side comparison.  You can choose to replace the reference image, or not, depending on whether a real error was discovered.
+在 Julia REPL 中，运行 `Pkg.test(name="Plots")`。这将尝试绘制测试，然后将结果与存储的参考图像进行比较。如果测试输出与参考输出有足够的不同（使用 Tim Holy 的优秀算法进行比较），那么一个 GTK 窗口将弹出，显示并排比较。你可以选择替换参考图像，或者不替换，这取决于是否发现了真正的错误。
 
-After the reference images have been updated, navigate to PlotReferenceImages and push the changes to Github:
+在参考图像被更新后，导航到 PlotReferenceImages 并将更改推送到 Github：
 
 ```
 cd ~/.julia/v0.5/PlotReferenceImages
@@ -306,12 +300,8 @@ git commit -am "a useful message"
 git push
 ```
 
-If there are mis-matches due to bugs, **don't update the reference image**.
+如果由于错误存在不匹配，**不要更新参考图像**。
 
 #### CI
 
-On a `git push` the tests will be run automatically as part of our continuous integration setup.
-This runs the same tests as above, downloading and comparing to the reference images, though with a larger tolerance for differences.
-When these error, it may be due to timeouts, stale reference images, or a host of other reasons.
-Check the logs to determine the reason.
-If the tests are broken because of a new commit, consider rolling back.
+在 `git push` 上，测试将作为我们连续集成设置的一部分自动运行。这将运行与上面相同的测试，下载并比较参考图像，尽管对差异的容忍度更大。当这些错误时，可能是由于超时、过时的参考图像或其他一系列原因。检查日志以确定原因。如果测试因新的提交而破坏，考虑回滚。

@@ -3,37 +3,37 @@ using Plots; gr()
 Plots.reset_defaults()
 ```
 
-# [Input Data](@id input-data)
+# [输入数据](@id input-data)
 
-Part of the power of Plots lies is in the many combinations of allowed input data.
-You shouldn't spend your time transforming and massaging your data into a specific format.
-Let Plots do that for you.
+Plots的强大之处在于它支持许多种输入数据的组合。
+你不需要花费时间将你的数据转换和整理成特定的格式。
+让Plots为你做这个工作。
 
-There are a few rules to remember, and you'll be a power user in no time.
+只需记住几条规则，你很快就能成为高级用户。
 
-## Inputs are arguments, not keywords
+## 输入是参数，不是关键字
 
-The `plot` function has several methods:
-`plot(y)`: treats the input as values for the `y`-axis and yields a unit-range as `x`-values.
-`plot(x, y)`: creates a 2D plot
-`plot(x, y, z)`: creates a 3D plot
+`plot`函数有几种方法：
+`plot(y)`：将输入视为`y`轴的值，并生成一个单位范围作为`x`值。
+`plot(x, y)`：创建一个2D图
+`plot(x, y, z)`：创建一个3D图
 
-The reason lies in the flexibility of Julia's multiple dispatch, where every combination of input types
-can have unique behavior, when desired.
+原因在于Julia的多重派发的灵活性，每种输入类型的组合
+可以有独特的行为，如果需要的话。
 
-## [Columns are series](@id columns-are-series)
+## [列是系列](@id columns-are-series)
 
-In most cases, passing a (`n` × `m`) matrix of values (numbers, etc) will create `m` series, each with `n` data points.  This follows a consistent rule… vectors apply to a series, matrices apply to many series.  This rule carries into keyword arguments.  `scatter(rand(10,4), markershape = [:circle, :rect])` will create 4 series, each assigned the markershape vector [:circle,:rect].  However, `scatter(rand(10,4), markershape = [:circle :rect])` will create 4 series, with series 1 and 3 having markers shaped as `:circle` and series 2 and 4 having markers shaped as `:rect` (i.e. as squares).  The difference is that in the first example, it is a length-2 column vector, and in the second example it is a (1 × 2) row vector (a Matrix).
+在大多数情况下，传入一个(`n` × `m`)的值矩阵（数字等）将创建`m`个系列，每个系列有`n`个数据点。这遵循一个一致的规则…向量应用于一个系列，矩阵应用于多个系列。这个规则也适用于关键字参数。`scatter(rand(10,4), markershape = [:circle, :rect])`将创建4个系列，每个系列都分配了markershape向量[:circle,:rect]。然而，`scatter(rand(10,4), markershape = [:circle :rect])`将创建4个系列，系列1和3的标记形状为`:circle`，系列2和4的标记形状为`:rect`（即正方形）。区别在于，在第一个例子中，它是一个长度为2的列向量，在第二个例子中，它是一个(1 × 2)的行向量（一个矩阵）。
 
-The flexibility and power of this can be illustrated by the following piece of code:
+这个的灵活性和强大可以通过以下代码片段来说明：
 ```@example input_data
 using Plots
 
-# 10 data points in 4 series
+# 4个系列中的10个数据点
 xs = range(0, 2π, length = 10)
 data = [sin.(xs) cos.(xs) 2sin.(xs) 2cos.(xs)]
 
-# We put labels in a row vector: applies to each series
+# 我们将标签放在一个行向量中：适用于每个系列
 labels = ["Apples" "Oranges" "Hats" "Shoes"]
 
 # Marker shapes in a column vector: applies to data points
@@ -54,9 +54,9 @@ plot(
     markersize = 10
 )
 ```
-This example plots the four series with different labels, marker shapes, and marker colors by combining row and column vectors to decorate the data.
+这个例子将四个系列用不同的标签、标记形状和标记颜色绘制出来，通过组合行向量和列向量来装饰数据。
 
-The following example illustrates how Plots.jl handles: an array of matrices, an array of arrays of arrays and an array of tuples of arrays.
+以下示例说明了Plots.jl如何处理：一个矩阵数组，一个数组的数组数组，以及一个数组的数组元组。
 ```@example input_data
 x1, x2 = [1, 0],  [2, 3]    # vectors
 y1, y2 = [4, 5],  [6, 7]    # vectors
@@ -67,13 +67,13 @@ plot([[x1,y1], [x2,y2]])    # array of array of arrays -> 4 series, plots each i
 plot([(x1,y1), (x2,y2)])    # array of tuples of arrays -> 2 series, plots each tuple as new series
 ```
 
-## Unconnected Data within same groups
+## 同组中的非连续数据
 
-As shown in the examples, you can plot a single polygon by using a single call to `plot` using the `:path` line type. You can use several calls to `plot` to draw several polygons.
+如示例所示，你可以使用单个调用`plot`使用`:path`线类型绘制单个多边形。你可以使用多个调用`plot`绘制多个多边形。
 
-Now, let's say you're plotting `n` polygons grouped into `g` groups, with `n` > `g`. While you can use `plot` to draw separate polygons with each call, you cannot group two separate plots back into a single group. You'll end up with `n` groups in the legend, rather than `g` groups.
+现在，假设你正在绘制`n`个多边形分组到`g`个组，其中`n` > `g`。虽然你可以使用`plot`在每次调用时绘制单独的多边形，但你不能将两个单独的图形组合回一个单独的组。你将在图例中结束`n`个组，而不是`g`个组。
 
-To adress this, you can use `NaN` as a path separator. A call to `plot` would then draw one path with disjoints The following code draws `n=4` rectangles in `g=2` groups.
+为了解决这个问题，你可以使用`NaN`作为路径分隔符。然后调用`plot`将绘制一个具有不连续的路径。以下代码绘制`n=4`个矩形在`g=2`个组。
 
 ```@example input_data
 using Plots
@@ -105,9 +105,9 @@ png("input_data_1") # hide
 ```
 ![](input_data_1.png)
 
-## DataFrames support
+## 支持DataFrames
 
-Using the [StatsPlots](https://github.com/JuliaPlots/StatsPlots.jl) extension package, you can pass a `DataFrame` as the first argument (similar to Gadfly or R's ggplot2).  For data fields or certain attributes (such as `group`) a symbol will be replaced with the corresponding column(s) of the `DataFrame`.  Additionally, the column name might be used as the   An example:
+使用[StatsPlots](https://github.com/JuliaPlots/StatsPlots.jl)扩展包，你可以将`DataFrame`作为第一个参数传入（类似于Gadfly或R的ggplot2）对于数据字段或某些属性（如`group`），一个符号将被替换为`DataFrame`的相应列。此外，列名可能会被用作一个例子：
 
 ```@example input_data
 using StatsPlots, RDatasets
@@ -122,9 +122,9 @@ iris = dataset("datasets", "iris")
 )
 ```
 
-## Functions
+## 函数
 
-Functions can typically be used in place of input data, and they will be mapped as needed. 2D and 3D parametric plots can also be created, and ranges can be given as vectors or min/max.  For example, here are alternative methods to create the same plot:
+函数通常可以替代输入数据，并且它们将按需要进行映射。还可以创建2D和3D的参数图，范围可以给出为向量或最小/最大值。例如，这里有几种创建相同图的替代方法：
 
 ```@example input_data
 using Plots
@@ -141,11 +141,11 @@ plot(sin, cos, tvec)
 plot(sin, cos, tmin, tmax)
 ```
 
-Vectors of functions are allowed as well (one series per function).
+函数的向量也是允许的（每个函数一个系列）。
 
-## Images
+## 图像
 
-Images can be directly added to plots by using the [Images.jl](https://github.com/timholy/Images.jl) library. For example, one can import a raster image and plot it with Plots via the commands:
+可以直接使用[Images.jl](https://github.com/timholy/Images.jl)库将图像添加到图中。例如，可以导入一个栅格图像并通过以下命令将其与Plots一起绘制：
 
 ```julia
 using Plots, Images
@@ -153,9 +153,9 @@ img = load("image.png")
 plot(img)
 ```
 
-PDF graphics can also be added to Plots.jl plots using `load("image.pdf")`. Note that Images.jl requires that the PDF color scheme is RGB.
+PDF图形也可以使用`load("image.pdf")`添加到Plots.jl图中。请注意，Images.jl要求PDF的颜色方案是RGB。
 
-## Shapes
+## 形状
 
 *Save Gotham*
 
@@ -238,15 +238,15 @@ batman = translate(batman, 0.7, 1.23)
 plot!(batman, fillcolor = :black)
 ```
 
-## [Extra keywords](@id extra_kwargs)
+## [额外的关键字](@id extra_kwargs)
 
-There are some features that are very specific to a certain backend or not yet implemented in Plots.
-For these cases it is possible to forward extra keywords to the backend.
-Every keyword that is not a Plots keyword will then be collected in a `extra_kwargs` dictionary.
+有些特性非常特定于某个后端或者还没有在Plots中实现。
+对于这些情况，可以将额外的关键字转发给后端。
+每个不是Plots关键字的关键字将被收集在一个`extra_kwargs`字典中。
 
-This dictionary has three layers: `:plot`, `:subplot` and `:series` (default).
-To which layer the keywords get collected can be specified by the `extra_kwargs` keyword.
-If arguments should be passed at multiple layers in the same call or the keyword is already a valid Plots keyword, the `extra_kwargs` dictionary has to be constructed at the call site.
+这个字典有三层：`:plot`，`:subplot`和`:series`（默认）。
+关键字被收集到哪一层可以由`extra_kwargs`关键字指定。
+如果在同一次调用中需要在多个层次传递参数，或者关键字已经是一个有效的Plots关键字，那么必须在调用处构造`extra_kwargs`字典。
 ```julia
 plot(1:5, series_keyword = 5)
 # results in extra_kwargs = Dict( :series => Dict( series_keyword => 5 ) )
@@ -255,9 +255,9 @@ plot(1:5, colormap_width = 6, extra_kwargs = :subplot)
 plot(1:5, extra_kwargs = Dict( :series => Dict( series_keyword => 5 ), :subplot => Dict( colormap_width => 6 ) ) )
 ```
 
-Refer to the [tracking issue](https://github.com/JuliaPlots/Plots.jl/issues/2648) to see for which backends this feature is implemented.
-Which extra keywords the backend actually handles should be documented in the backend documentation.
+参考[追踪问题](https://github.com/JuliaPlots/Plots.jl/issues/2648)来查看这个特性在哪些后端中实现了。
+后端实际处理的额外关键字应该在后端文档中有所记录。
 
 !!! warning
-    Using the extra keywords machinery will make your code backend dependent.
-    Only use it for final tweaks. It is clearly a bad idea to use it in recipes.
+    使用额外关键字机制会使你的代码依赖于后端。
+    只在最后调整时使用它。在配方中使用显然是一个坏主意。

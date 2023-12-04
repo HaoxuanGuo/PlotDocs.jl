@@ -3,49 +3,47 @@ using Plots; gr()
 Plots.reset_defaults()
 ```
 
-# Plots - powerful convenience for visualization in Julia
+# Plots - Julia中强大且方便的可视化工具
 
-**Author: Thomas Breloff (@tbreloff)**
+**作者：Thomas Breloff (@tbreloff)**
 
-To get started, [see the tutorial](@ref tutorial).
+要开始，请[参见教程](@ref tutorial)。
 
-Almost everything in Plots is done by specifying plot [attributes](@ref attributes).
+在Plots中，几乎所有的操作都是通过指定绘图[属性](@ref attributes)来完成的。
 
-Tap into the extensive visualization functionality enabled by the [Plots ecosystem](@ref ecosystem), and easily build your own complex graphics components with [recipes](@ref recipes).
+利用[Plots生态系统](@ref ecosystem)提供的广泛的可视化功能，以及使用[配方](@ref recipes)轻松构建自己的复杂图形组件。
 
+## Julia中的Plots简介
 
-## Intro to Plots in Julia
+数据可视化有着复杂的历史。绘图软件在功能和简单性、速度和美观、静态和动态界面之间进行权衡。有些包创建一个显示并且永不更改，而其他包则实时更新。
 
-Data visualization has a complicated history.  Plotting software makes trade-offs between features and simplicity, speed and beauty, and a static and dynamic interface. Some packages make a display and never change it, while others make updates in real-time.
+Plots是一个可视化界面和工具集。它位于其他后端之上，如GR, PythonPlot, PGFPlotsX或Plotly，将命令与实现连接起来。如果一个后端不支持您所需的功能或没有做出正确的权衡，您可以只通过一个命令切换到另一个后端。无需更改您的代码。无需学习新的语法。Plots可能是你最后需要学习的绘图包。
 
-Plots is a visualization interface and toolset. It sits above other backends, like GR, PythonPlot, PGFPlotsX, or Plotly, connecting commands with implementation. If one backend does not support your desired features or make the right trade-offs, you can just switch to another backend with one command. No need to change your code. No need to learn a new syntax. Plots might be the last plotting package you ever learn.
+该包的目标是：
 
-The goals with the package are:
+- **强大**。用更少做更多。复杂的可视化变得简单。
+- **直观**。在不阅读大量文档的情况下开始生成图表。命令应该"就能工作"。
+- **简洁**。代码越少意味着错误越少，开发和分析更高效。
+- **灵活**。从你最喜欢的包中生成你最喜欢的图表，只是更快更简单。
+- **一致**。不要承诺使用一个图形包。使用相同的代码并利用所有[后端](@ref backends)的优点。
+- **轻量级**。由于后端是动态加载和初始化的，所以依赖性非常少。
+- **智能**。它不完全是AGI，但Plots应该能够弄清楚你希望它做什么，而不仅仅是你告诉它。
 
-- **Powerful**.  Do more with less. Complex visualizations become easy.
-- **Intuitive**.  Start generating plots without reading volumes of documentation. Commands should "just work."
-- **Concise**.  Less code means fewer mistakes and more efficient development and analysis.
-- **Flexible**.  Produce your favorite plots from your favorite package, only quicker and simpler.
-- **Consistent**.  Don't commit to one graphics package. Use the same code and access the strengths of all [backends](@ref backends).
-- **Lightweight**.  Very few dependencies, since backends are loaded and initialized dynamically.
-- **Smart**.  It's not quite AGI, but Plots should figure out what you **want** it to do... not just what you **tell** it.
+使用Plots中的[预处理管道](@ref pipeline)在调用后端代码之前完全描述您的可视化。这种预处理保持了模块性，并允许有效地分离前端代码、算法和后端图形。
 
+请将愿望清单项、错误或任何其他评论/问题添加到[问题列表](https://github.com/tbreloff/Plots.jl/issues)，并[在zulip上参与讨论](https://julialang.zulipchat.com/#streams/236493/plots.jl)。
 
-Use the [preprocessing pipeline](@ref pipeline) in Plots to describe your visualization completely before it calls the backend code.  This preprocessing maintains modularity and allows for efficient separation of front end code, algorithms, and backend graphics.
-
-Please add wishlist items, bugs, or any other comments/questions to the [issues list](https://github.com/tbreloff/Plots.jl/issues), and [join the conversation on zulip](https://julialang.zulipchat.com/#streams/236493/plots.jl).
-
-Nevertheless, extreme configurability is not a goal of Plots. If you require a rather specific plotting feature, feel free to [request it](https://github.com/JuliaPlots/Plots.jl/issues?q=is%3Aissue+is%3Aopen+label%3Aextension). However, do understand that Plots has to implement the feature across all backends which might be challenging due some backends' limitations. 
+尽管如此，极度可配置性并不是Plots的目标。如果你需要一个相当特定的绘图功能，请随意[请求它](https://github.com/JuliaPlots/Plots.jl/issues?q=is%3Aissue+is%3Aopen+label%3Aextension)。然而，请理解，Plots需要在所有的后端上实现该功能，这可能因为某些后端的限制而具有挑战性。
 
 ---
 
-### [Simple is Beautiful](@id simple-is-beautiful)
+### [简单就是美](@id simple-is-beautiful)
 
-Lorenz Attractor
+洛伦兹吸引子
 
 ```@example index
 using Plots
-# define the Lorenz attractor
+# 定义洛伦兹吸引子
 Base.@kwdef mutable struct Lorenz
     dt::Float64 = 0.02
     σ::Float64 = 10
@@ -68,7 +66,7 @@ end
 attractor = Lorenz()
 
 
-# initialize a 3D plot with 1 empty series
+# 初始化一个3D图表，包含1个空的系列
 plt = plot3d(
     1,
     xlim = (-30, 30),
@@ -79,14 +77,14 @@ plt = plot3d(
     marker = 2,
 )
 
-# build an animated gif by pushing new points to the plot, saving every 10th frame
+# 通过向图表推送新点来构建一个动画gif，每10帧保存一次
 @gif for i=1:1500
     step!(attractor)
     push!(plt, attractor.x, attractor.y, attractor.z)
 end every 10
 ```
 
-Make some waves
+制造一些波浪
 
 ```@example index
 using Plots
@@ -98,38 +96,38 @@ n = 100
 @gif for i in range(0, stop = 2π, length = n)
     f(x, y) = sin(x + 10sin(i)) + cos(y)
 
-    # create a plot with 3 subplots and a custom layout
+    # 创建一个包含3个子图和自定义布局的图表
     l = @layout [a{0.7w} b; c{0.2h}]
     p = plot(x, y, f, st = [:surface, :contourf], layout = l)
 
-    # induce a slight oscillating camera angle sweep, in degrees (azimuth, altitude)
+    # 引入一个轻微的摇摆相机角度扫描，以度为单位（方位角，高度）
     plot!(p[1], camera = (10 * (1 + cos(i)), 40))
 
-    # add a tracking line
+    # 添加一个跟踪线
     fixed_x = zeros(40)
     z = map(f, fixed_x, y)
     plot!(p[1], fixed_x, y, z, line = (:black, 5, 0.2))
     vline!(p[2], [0], line = (:black, 5))
 
-    # add to and show the tracked values over time
+    # 添加到并随时间显示跟踪值
     global zs = vcat(zs, z')
     plot!(p[3], zs, alpha = 0.2, palette = cgrad(:blues).colors)
 end
 ```
 
 
-Iris Dataset
+鸢尾花数据集
 
 ```@example index
-# load a dataset
+# 加载数据集
 using RDatasets
 iris = dataset("datasets", "iris");
 
-# load the StatsPlots recipes (for DataFrames) available via:
+# 通过以下方式加载StatsPlots配方（用于DataFrames）：
 # Pkg.add("StatsPlots")
 using StatsPlots
 
-# Scatter plot with some custom settings
+# 带有一些自定义设置的散点图
 @df iris scatter(
     :SepalLength,
     :SepalWidth,

@@ -41,74 +41,70 @@ Plots.reset_defaults()
 end
 ```
 
-# [Backends](@id backends)
+# [后端](@id backends)
 
-Backends are the lifeblood of Plots, and the diversity between features, approaches, and strengths/weaknesses was
-one of the primary reasons that I started this package.
+后端是Plots的命脉，不同后端之间的特性、方法以及优点/缺点的多样性是我开始这个包的主要原因。
 
-For those who haven't had the pleasure of hacking on 15 different plotting APIs: first, consider yourself lucky.
-However, you will probably have a hard time choosing the right backend for your task at hand.
-This document is meant to be a guide and introduction to make that choice.
+对于那些还没有在15种不同的绘图API上进行过编程的人：首先，你应该感到幸运。然而，你可能会在选择适合你手头任务的正确后端上有些困难。这份文档旨在作为一个指南和介绍，帮助你做出选择。
 
-# Persistent backend selection
+# 持久的后端选择
 
-Plots uses the [Preferences](https://github.com/JuliaPackaging/Preferences.jl) mechanism to make the default backend choice persistent across julia restart.
+Plots使用[Preferences](https://github.com/JuliaPackaging/Preferences.jl)机制，使默认后端选择在julia重启后保持不变。
 
 ```julia
 $ JULIA_PKG_PRECOMPILE_AUTO=0 julia -e 'import Plots; Plots.set_default_backend!(:pythonplot)'
-$ julia  # restart, show persistent mode
+$ julia  # 重启，显示持久模式
 julia> using Plots
 [ Info: Precompiling Plots [91a5bcdd-55d7-5caf-9e0b-520d859cae80]
-[ Info: PythonPlot  # precompiles for this backend
-julia> plot(1:2) |> display  # uses `PythonPlot` by default
+[ Info: PythonPlot  # 为此后端预编译
+julia> plot(1:2) |> display  # 默认使用`PythonPlot`
 ```
 
-You can clear preferences with `Plots.set_default_backend!()`.
-Alternatively, one can use the environment variable `PLOTS_DEFAULT_BACKEND` to select the default backend (but this will need to trigger manual precompilation using `Base.compilecache(Plots)`).
+你可以使用`Plots.set_default_backend!()`清除偏好设置。或者，可以使用环境变量`PLOTS_DEFAULT_BACKEND`选择默认后端（但这需要使用`Base.compilecache(Plots)`手动触发预编译）。
 
-# At a glance
+# 一瞥
 
-My favorites: `GR` for speed, `Plotly(JS)` for interactivity, `UnicodePlots` for REPL/SSH and `PythonPlot` otherwise.
+我的最爱：`GR`对于速度，`Plotly(JS)`对于交互性，`UnicodePlots`对于REPL/SSH，`PythonPlot`对于其他情况。
 
-| If you require...         | then use...                                 |
+| 如果你需要...         | 那么使用...                                 |
 | :------------------------ | :------------------------------------------ |
-| features                  | GR, PythonPlot, Plotly(JS), Gaston          |
-| speed                     | GR, UnicodePlots, InspectDR, Gaston         |
-| interactivity             | PythonPlot, Plotly(JS), InspectDR           |
-| beauty                    | GR, Plotly(JS), PGFPlots/ PGFPlotsX         |
-| REPL plotting             | UnicodePlots                                |
-| 3D plots                  | GR, PythonPlot, Plotly(JS), Gaston          |
-| a GUI window              | GR, PythonPlot, PlotlyJS, Gaston, InspectDR |
-| a small footprint         | UnicodePlots, Plotly                        |
-| backend stability         | PythonPlot, Gaston                          |
-| plot+data -> `.hdf5` file | HDF5                                        |
+| 功能                  | GR, PythonPlot, Plotly(JS), Gaston          |
+| 速度                     | GR, UnicodePlots, InspectDR, Gaston         |
+| 交互性             | PythonPlot, Plotly(JS), InspectDR           |
+| 美观                    | GR, Plotly(JS), PGFPlots/ PGFPlotsX         |
+| REPL绘图             | UnicodePlots                                |
+| 3D绘图                  | GR, PythonPlot, Plotly(JS), Gaston          |
+| GUI窗口              | GR, PythonPlot, PlotlyJS, Gaston, InspectDR |
+| 小内存占用         | UnicodePlots, Plotly                        |
+| 后端稳定性         | PythonPlot, Gaston                          |
+| 绘图+数据 -> `.hdf5` 文件 | HDF5                                        |
 
-Of course this list is rather subjective and nothing in life is that simple. Likely there are subtle tradeoffs between backends, long hidden bugs, and more excitement. Don't be shy to try out something new !
+当然，这个列表相当主观，生活中没有那么简单。可能存在微妙的后端之间的权衡，长期隐藏的bug，以及更多的兴奋。不要害羞尝试新的东西！
 
 ---
 
 ## [GR](https://github.com/jheinen/GR.jl)
 
-The default backend. Very fast with lots of plot types. Still actively developed and improving daily.
+默认的后端。非常快，有很多种绘图类型。仍在积极开发并且每天都在改进。
 
 ```@example backends
 gr(); backendplot()  #hide
 ```
 
-Pros:
+优点：
 
-- Speed
-- 2D and 3D
-- Standalone or inline
+- 速度
+- 2D和3D
+- 独立或内联
 
-Cons:
+缺点：
 
-- Limited interactivity
+- 交互性有限
 
-Primary author: Josef Heinen (@jheinen)
+主要作者：Josef Heinen (@jheinen)
 
-### Fine tuning
-It is possible to use more features of `GR` via the [`extra_kwargs`](@ref extra_kwargs) mechanism.
+### 精细调整
+可以通过[`extra_kwargs`](@ref extra_kwargs)机制使用`GR`的更多功能。
 
 ```@example backends
 using Plots; gr()
@@ -120,32 +116,32 @@ surface(
 )
 ```
 
-#### Supported `:subplot` `:extra_kwargs`
+#### 支持的`:subplot` `:extra_kwargs`
 
-| Keyword        | Description                         |
+| 关键字        | 描述                         |
 | :------------- | :---------------------------------- |
-| legend_hfactor | Vertical spacing factor for legends |
-| legend_wfactor | Multiplicative factor influencing the legend width |
+| legend_hfactor | 图例的垂直间距因子 |
+| legend_wfactor | 影响图例宽度的乘法因子 |
 
-#### Supported `:series` `:extra_kwargs`
+#### 支持的`:series` `:extra_kwargs`
 
-| Series Type              | Keyword        | Description                                                                                      |
+| 系列类型              | 关键字        | 描述                                                                                      |
 | :----------------------- | :------------- | :----------------------------------------------------------------------------------------------- |
-| `:surface`               | nx             | Number of interpolation points in the x direction                                                |
-| `:surface`               | ny             | Number of interpolation points in the y direction                                                |
-| `:surface`, `:wireframe` | display_option | see [GR doc](https://gr-framework.org/julia-gr.html#GR.surface-e3e6f234cc6cd4713b8727c874a5f331) |
+| `:surface`               | nx             | x方向的插值点数量                                                |
+| `:surface`               | ny             | y方向的插值点数量                                                |
+| `:surface`, `:wireframe` | display_option | 参见[GR文档](https://gr-framework.org/julia-gr.html#GR.surface-e3e6f234cc6cd4713b8727c874a5f331) |
 
 
 ## [Plotly / PlotlyJS](https://github.com/spencerlyon2/PlotlyJS.jl)
 
-These are treated as separate backends, though they share much of the code and use the Plotly JavaScript API.
-`plotly()` is the only dependency-free plotting option, as the required JavaScript is bundled with Plots.
-It can create inline plots in IJulia, or open standalone browser windows when run from the Julia REPL.
+这些被视为独立的后端，尽管它们共享大部分代码并使用Plotly JavaScript API。
+`plotly()`是唯一不需要依赖的绘图选项，因为所需的JavaScript已与Plots捆绑在一起。
+它可以在IJulia中创建内联图，或者在从Julia REPL运行时打开独立的浏览器窗口。
 
-`plotlyjs()` is the preferred option, and taps into the great functionality of Spencer Lyon's PlotlyJS.jl.
-Inline IJulia plots can be updated from any cell... something that makes this backend stand out.
-From the Julia REPL, it taps into Blink.jl and Electron to plot within a standalone GUI window... also very cool.
-Also, PlotlyJS supports saving the output to more formats than Plotly, such as EPS and PDF, and thus is the recommended version of Plotly for developing publication-quality figures.
+`plotlyjs()`是首选选项，它利用了Spencer Lyon的PlotlyJS.jl的强大功能。
+内联IJulia图可以从任何单元格更新...这是这个后端的突出之处。
+从Julia REPL，它利用Blink.jl和Electron在独立的GUI窗口内绘图...也非常酷。
+此外，PlotlyJS支持将输出保存为比Plotly更多的格式，如EPS和PDF，因此是开发出版质量图形的Plotly推荐版本。
 
 ```@example backends
 plotlyjs(); backendplot(n = 2)  #hide
@@ -153,32 +149,32 @@ png("backends_plotlyjs.png")  #hide
 ```
 ![](backends_plotlyjs.png)
 
-Pros:
+优点：
 
-- [Tons of functionality](https://plot.ly/javascript/)
-- 2D and 3D
-- Mature library
-- Interactivity (even when inline)
-- Standalone or inline
+- [大量的功能](https://plot.ly/javascript/)
+- 2D和3D
+- 成熟的库
+- 交互性（即使在内联）
+- 独立或内联
 
-Cons:
+缺点：
 
-- No custom shapes
-- JSON may limit performance
+- 没有自定义形状
+- JSON可能限制性能
 
-Primary PlotlyJS.jl author: Spencer Lyon (@spencerlyon2)
+主要PlotlyJS.jl作者：Spencer Lyon (@spencerlyon2)
 
 ### MathJax
 
-Plotly needs to load MathJax to render LaTeX strings, therefore passing extra keywords with `extra_kwargs = :plot` is implemented.
-With that it is possible to pass a header to the extra `include_mathjax` keyword.
-It has the following options:
+Plotly需要加载MathJax以渲染LaTeX字符串，因此通过`extra_kwargs = :plot`实现了传递额外关键字。
+有了它，就可以将头部传递给额外的`include_mathjax`关键字。
+它有以下选项：
 
-- `include_mathjax = ""` (default): no mathjax header
-- `include_mathjax = "cdn"` include the standard online version of the header
-- `include_mathjax = "<filename?config=xyz>"` include a user-defined file
+- `include_mathjax = ""` (默认): 没有mathjax头部
+- `include_mathjax = "cdn"` 包含标准的在线版本的头部
+- `include_mathjax = "<filename?config=xyz>"` 包含用户定义的文件
 
-These can also be passed using the `extra_plot_kwargs` keyword.
+这些也可以使用`extra_plot_kwargs`关键字传递。
 
 ```@example backends
 using LaTeXStrings
@@ -203,12 +199,12 @@ Plots.html("plotly_mathjax")  #hide
 <object type="text/html" data="plotly_mathjax.html" style="width:100%;height:450px;"></object>
 ```
 
-### Fine tuning
-It is possible to add additional arguments to the plotly series and layout dictionaries via the [`extra_kwargs`](@ref extra_kwargs) mechanism.
-Arbitrary arguments are supported but one needs to be careful since no checks are performed and thus it is possible to unintentionally overwrite existing entries.
+### 精细调整
+可以通过[`extra_kwargs`](@ref extra_kwargs)机制向plotly系列和布局字典添加额外的参数。
+支持任意参数，但需要小心，因为没有进行检查，因此可能无意中覆盖现有条目。
 
-For example adding [customdata](https://plotly.com/javascript/reference/scatter/#scatter-customdata) can be done the following way `scatter(1:3, customdata=["a", "b", "c"])`.
-One can also pass multiple extra arguments to plotly.
+例如，添加[customdata](https://plotly.com/javascript/reference/scatter/#scatter-customdata)可以通过以下方式完成`scatter(1:3, customdata=["a", "b", "c"])`。
+还可以向plotly传递多个额外参数。
 ```
 pl = scatter(
     1:3,
@@ -222,30 +218,30 @@ pl = scatter(
 
 ## [PythonPlot](https://github.com/stevengj/PythonPlot.jl)
 
-A Julia wrapper around the popular python package `Matplotlib`. It uses `PythonCall.jl` to pass data with minimal overhead.
+围绕流行的Python包`Matplotlib`的Julia包装器。它使用`PythonCall.jl`传递数据，开销最小。
 
 ```@example backends
 pythonplot(); backendplot()  #hide
 ```
 
-Pros:
+优点：
 
-- Tons of functionality
-- 2D and 3D
-- Mature library
-- Standalone or inline
-- Well supported in Plots
+- 大量的功能
+- 2D和3D
+- 成熟的库
+- 独立或内联
+- 在Plots中得到了良好的支持
 
-Cons:
+缺点：
 
-- Uses Python
-- Dependencies frequently cause setup issues
+- 使用Python
+- 依赖性经常导致设置问题
 
-Primary author: Steven G Johnson (@stevengj)
+主要作者：Steven G Johnson (@stevengj)
 
-### Fine tuning
-It is possible to use more features of `matplotlib` via the [`extra_kwargs`](@ref extra_kwargs) mechanism.
-For example, for a 3D plot, the following example should generate a colorbar at a proper location; without the `extra_kwargs` below, the colorbar is displayed too far right to see its ticks and numbers. The four coordinates in the example below, i.e., `[0.9, 0.05, 0.05, 0.9]` specify the colorbar location `[ left, bottom, width, height ]`. Note that for 2D plots, this fine tuning is not necessary.
+### 精细调整
+可以通过[`extra_kwargs`](@ref extra_kwargs)机制使用`matplotlib`的更多功能。
+例如，对于一个3D图，以下例子应该生成一个位于适当位置的colorbar；如果没有下面的`extra_kwargs`，colorbar将显示得过于右侧，无法看到其刻度和数字。下面的例子中的四个坐标，即`[0.9, 0.05, 0.05, 0.9]`指定了colorbar的位置`[ left, bottom, width, height ]`。注意对于2D图，这种精细调整是不必要的。
 
 ```@example backends
 using Plots; pythonplot()
@@ -255,67 +251,65 @@ fn(x, y) = 3 * exp(-(3x^2 + y^2)/5) * (sin(x+2y))+0.1randn(1)[1]
 surface(x, y, fn, c=:viridis, extra_kwargs=Dict(:subplot=>Dict("3d_colorbar_axis" => [0.9, 0.05, 0.05, 0.9])))
 ```
 
-#### Supported `:subplot` `:extra_kwargs`
+#### 支持的`:subplot` `:extra_kwargs`
 
-| Keyword          | Description                                                                      |
-| :--------------- | :------------------------------------------------------------------------------- |
-| 3d_colorbar_axis | Specifying the colorbar location `[ left, bottom, width, height ]` for a 3D plot |
+| 关键字          | 描述| :--------------- | :------------------------------------------------------------------------------- |
+| 3d_colorbar_axis | 指定3D图的colorbar位置`[ left, bottom, width, height ]` |
 
 
 ## [PGFPlotsX](https://github.com/KristofferC/PGFPlotsX.jl)
 
-LaTeX plotting, based on `PGF/TikZ`.
+基于`PGF/TikZ`的LaTeX绘图。
 
 ```@example backends
 pgfplotsx(); backendplot()  #hide
 ```
 
-Successor backend of PGFPlots backend.
+是PGFPlots后端的继任者。
 
-Has more features and is still in development otherwise the same.
+具有更多的功能并且仍在开发中，否则相同。
 
-!!! tip
-    To add save a standalone .tex file including a preamble use attribute `tex_output_standalone = true` in your `plot` command.
+!!! 提示
+    要添加保存一个包含前导词的独立.tex文件，请在您的`plot`命令中使用属性`tex_output_standalone = true`。
 
-Pros:
+优点：
 
-- Nice looking plots
-- Lots of functionality (though the code is still WIP)
+- 美观的图表
+- 大量的功能（尽管代码仍在开发中）
 
-Cons:
+缺点：
 
-- Tricky to install
-- Heavy-weight dependencies
+- 安装困难
+- 重量级依赖项
 
-Authors:
+作者：
 
 - PGFPlots: Christian Feuersanger
 - PGFPlotsX.jl: Kristoffer Carlsson (@KristofferC89), Tamas K. Papp (@tpapp)
-- Plots <--> PGFPlotsX link code: Simon Christ (@BeastyBlacksmith), based on the code of Patrick Kofod Mogensen (@pkofod)
+- Plots <--> PGFPlotsX链接代码：Simon Christ (@BeastyBlacksmith)，基于Patrick Kofod Mogensen (@pkofod)的代码
 
-### LaTeX workflow
+### LaTeX工作流
 
-To use the native LaTeX output of the `pgfplotsx` backend you can save your plot as a `.tex` or `.tikz` file.
+要使用`pgfplotsx`后端的原生LaTeX输出，你可以将你的图保存为`.tex`或`.tikz`文件。
 ```julia
 using Plots; pgfplotsx()
 pl  = plot(1:5)
 pl2 = plot((1:5).^2, tex_output_standalone = true)
-savefig(pl,  "myline.tikz")    # produces a tikzpicture environment that can be included in other documents
-savefig(pl2, "myparabola.tex") # produces a standalone document that compiles by itself including preamble
+savefig(pl,  "myline.tikz")    # 生成一个tikzpicture环境，可以包含在其他文档中
+savefig(pl2, "myparabola.tex") # 生成一个独立的文档，可以自行编译，包括前导词
 ```
-Saving as `.tikz` file has the advantage, that you can use `\includegraphics` to rescale your plot without changing the size of the fonts.
-The default LaTeX output is intended to be included as a figure in another document and will not compile by itself.
-If you include these figures in another LaTeX document you need to have the correct preamble.
-The preamble of a plot can be shown using `Plots.pgfx_preamble(pl)` or copied from the standalone output.
+保存为`.tikz`文件的优点是，你可以使用`\includegraphics`重新缩放你的图，而不改变字体的大小。
+默认的LaTeX输出旨在作为另一个文档的图形包含，它本身无法编译。
+如果你在另一个LaTeX文档中包含这些图形，你需要有正确的前导词。
+图的前导词可以使用`Plots.pgfx_preamble(pl)`显示，或者从独立输出中复制。
 
-#### Fine tuning
+#### 精细调整
 
-It is possible to use more features of `PGFPlotsX` via the [`extra_kwargs`](@ref extra_kwargs) mechanism.
-By default it interprets every extra keyword as an option to the `plot` command.
-Setting `extra_kwargs = :subplot` will treat them as an option to the `axis` command and `extra_kwargs = :plot` will be treated as an option to the `tikzpicture` environment.
+可以通过[`extra_kwargs`](@ref extra_kwargs)机制使用`PGFPlotsX`的更多功能。
+默认情况下，它将每个额外的关键字解释为`plot`命令的选项。
+设置`extra_kwargs = :subplot`将把它们视为`axis`命令的选项，`extra_kwargs = :plot`将被视为`tikzpicture`环境的选项。
 
-For example changing the colormap to one that is native to pgfplots can be achieved with the following.
-Like this it is possible to keep the preamble of latex documents clean.
+例如，更改为pgfplots本地的colormap可以用以下方式实现。像这样可以保持latex文档的前导词清洁。
 
 ```@example backends
 using Plots; pgfplotsx()
@@ -326,8 +320,8 @@ surface(range(-3,3, length=30), range(-3,3, length=30),
         extra_kwargs =:subplot)
 ```
 
-Further more additional commands or strings can be added via the special `add` keyword.
-This adds a square to a normal line plot:
+此外，可以通过特殊的`add`关键字添加额外的命令或字符串。
+这将一个正方形添加到普通的线图中：
 
 ```@example backends
 plot(1:5, add = raw"\draw (1,2) rectangle (2,3);", extra_kwargs = :subplot)
@@ -335,28 +329,28 @@ plot(1:5, add = raw"\draw (1,2) rectangle (2,3);", extra_kwargs = :subplot)
 
 ## [UnicodePlots](https://github.com/JuliaPlots/UnicodePlots.jl)
 
-Simple and lightweight. Plot directly in your terminal. You won't produce anything publication quality, but for a quick look at your data it is awesome. Allows plotting over a headless node (SSH).
+简单和轻量级。直接在你的终端中绘图。你不会产生任何出版质量的东西，但对于快速查看你的数据来说，它是非常棒的。允许在无头节点（SSH）上绘图。
 
 ```@example backends
 import FileIO, FreeType  #hide
 unicodeplots(); backendplot()  #hide
 ```
 
-Pros:
+优点：
 
-- Minimal dependencies
-- REPL plotting
-- Lightweight
-- Fast
+- 最小的依赖项
+- REPL绘图
+- 轻量级
+- 快速
 
-Cons:
+缺点：
 
-- Limited precision, density
+- 有限的精度，密度
 
-Primary author: Christof Stocker (@Evizero)
+主要作者：Christof Stocker (@Evizero)
 
-### Fine tuning
-It is possible to use more features of `UnicodePlots` via the [`extra_kwargs`](@ref extra_kwargs) mechanism.
+### 精细调整
+可以通过[`extra_kwargs`](@ref extra_kwargs)机制使用`UnicodePlots`的更多功能。
 
 ```@example backends
 using Plots; unicodeplots()
@@ -366,31 +360,31 @@ p = plot(1:4, 1:4, c = :yellow; extra_kwargs)
 plot!(p, 2:3, 2:3, c = :red)
 ```
 
-#### Supported `:subplot` `:extra_kwargs`
+#### 支持的`:subplot` `:extra_kwargs`
 
-| Keyword    | Description                                                                                                |
+| 关键字    | 描述                                                                                                |
 | :--------- | :--------------------------------------------------------------------------------------------------------- |
-| width      | Plot width                                                                                                 |
-| height     | Plot height                                                                                                |
-| projection | 3D projection (`:orthographic`, `perspective`)                                                             |
-| zoom       | 3D zoom level                                                                                              |
-| up         | 3D up vector (azimuth and elevation are controlled using `Plots.jl`'s `camera`)                            |
-| canvas     | Canvas type (see [Low-level Interface](https://github.com/JuliaPlots/UnicodePlots.jl#low-level-interface)) |
-| border     | Border type (`:solid`, `:bold`, `:dashed`, `:dotted`, `:ascii`, `:none`)                                   |
-| blend      | Toggle canvas color blending (`true` / `false`)                                                            |
+| width      | 绘图宽度                                                                                               |
+| height     | 绘图高度                                                                                                |
+| projection | 3D投影（`:orthographic`, `perspective`）                                                         |
+| zoom       | 3D缩放级别                                                                                              |
+| up         | 3D上向量（方位角和仰角使用`Plots.jl`的`camera`控制）                            |
+| canvas     | 画布类型 (参见 [Low-level Interface](https://github.com/JuliaPlots/UnicodePlots.jl#low-level-interface)) |
+| border     | 边框类型 (`:solid`, `:bold`, `:dashed`, `:dotted`, `:ascii`, `:none`)                                   |
+| blend      | 切换画布颜色混合 (`true` / `false`)                                                            |
 
-#### Supported `:series` `:extra_kwargs`
+#### 支持的`:series` `:extra_kwargs`
 
-| Series Type      | Keyword  | Description                                                                     |
+| 系列类型      | 关键字  | 描述                                                                     |
 | :--------------- | :------- | :------------------------------------------------------------------------------ |
-| `all`            | colormap | Colormap (see [Options](https://github.com/JuliaPlots/UnicodePlots.jl#options)) |
-| `heatmap`, `spy` | fix_ar   | Toggle fixing terminal aspect ratio (`true` / `false`)                          |
-| `surfaceplot`    | zscale   | `z` axis scaling                                                                |
-| `surfaceplot`    | lines    | Use `lineplot` instead of `scatterplot` (monotonic data)                        |
+| `all`            | colormap | 色图 (参见 [Options](https://github.com/JuliaPlots/UnicodePlots.jl#options)) |
+| `heatmap`, `spy` | fix_ar   | 切换固定终端纵横比 (`true` / `false`)                          |
+| `surfaceplot`    | zscale   | `z`轴缩放                                                                |
+| `surfaceplot`    | lines    | 使用`lineplot`代替`scatterplot` (单调数据)                        |
 
 ## [Gaston](https://github.com/mbaz/Gaston.jl)
 
-`Gaston` is a direct interface to [gnuplot](https://gnuplot.info), a cross platform command line driven plotting utility. The integration of `Gaston` in `Plots` is recent (2021), but a lot of features are supported.
+`Gaston`是对[gnuplot](https://gnuplot.info)，一个跨平台的命令行驱动的绘图工具的直接接口。`Gaston`在`Plots`中的集成是最近的（2021年），但支持很多功能。
 
 ```@example backends
 gaston(); backendplot()  #hide
@@ -398,146 +392,146 @@ gaston(); backendplot()  #hide
 
 ## [InspectDR](https://github.com/ma-laforge/InspectDR.jl)
 
-Fast plotting with a responsive GUI (optional).  Target: quickly identify design/simulation issues & glitches in order to shorten design iterations.
+快速绘图，有一个响应式的GUI（可选）。目标：快速识别设计/模拟问题和故障，以缩短设计迭代。
 
 ```@example backends
 inspectdr(); backendplot(n = 2)  #hide
 ```
 
-Pros:
+优点：
 
-- Relatively short load times / time to first plot.
-- Interactive mouse/keybindings.
-  - Fast & simple way to pan/zoom into data.
-- Drag & drop &Delta;-markers (measure/display &Delta;x, &Delta;y & slope).
-- Designed with larger datasets in mind.
-  - Responsive even with moderate (>200k points) datasets.
-  - Confirmed to handle 2GB datsets with reasonable speed on older desktop running Windows 7 (drag+pan of data area highly discouraged).
+- 相对较短的加载时间/首次绘图时间。
+- 交互式鼠标/键绑定。
+  - 快速简单的方式来平移/缩放数据。
+- 拖放&Delta;-标记（测量/显示&Delta;x, &Delta;y和斜率）。
+- 设计考虑到了较大的数据集。
+  - 即使对于中等大小（>200k点）的数据集也很反应灵敏。
+  - 已经证实可以在运行Windows 7的较旧的台式机上以合理的速度处理2GB的数据集（强烈建议不要拖动+平移数据区域）。
 
-Cons:
+缺点：
 
-- Mostly limited to 2D line/scatter plots
+- 主要限于2D线/散点图
 
-Primary author: MA Laforge (@ma-laforge)
+主要作者：MA Laforge (@ma-laforge)
 
 ## [HDF5](https://github.com/JuliaIO/HDF5.jl) (HDF5-Plots)
 
-Write plot + data to a *single* `HDF5` file using a human-readable structure that can easily be reverse-engineered.
+将图 + 数据写入*单个* `HDF5` 文件，使用人类可读的结构，可以轻松地进行逆向工程。
 
 ![](assets/hdf5_samplestruct.png)
 
-**Write to .hdf5 file**
+**写入.hdf5文件**
 ```julia
-hdf5() # Select HDF5-Plots "backend"
-p = plot(...) # Construct plot as usual
+hdf5() # 选择HDF5-Plots "后端"
+p = plot(...) # 像往常一样构造图
 Plots.hdf5plot_write(p, "plotsave.hdf5")
 ```
 
-**Read from .hdf5 file**
+**从.hdf5文件读取**
 ```julia
-pythonplot() # Must first select some backend
+pythonplot() # 首先必须选择某个后端
 pread = Plots.hdf5plot_read("plotsave.hdf5")
 display(pread)
 ```
 
-Pros:
+优点：
 
-- Open, standard file format for complex datasets.
-- Human readable (using [HDF5view](https://support.hdfgroup.org/products/java/hdfview/)).
-- Save plot + data to a single binary file.
-- (Re)-render plots at a later time using your favourite backend(s).
+- 复杂数据集的开放、标准文件格式。
+- 人类可读（使用[HDF5view](https://support.hdfgroup.org/products/java/hdfview/)）。
+- 将图 + 数据保存到单个二进制文件中。
+- 在以后的时间使用你最喜欢的后端（重新）渲染图。
 
-Cons:
+缺点：
 
-- Currently missing support for `SeriesAnnotations` & `GridLayout`.
-  - (Please open an "issue" if you have a need).
-- Not yet designed for backwards compatibility (no proper versioning).
-  - Therefore not truly adequate for archival purposes at the moment.
-- Currently implemented as a "backend" to avoid adding dependencies to `Plots.jl`.
+- 目前缺少对`SeriesAnnotations`和`GridLayout`的支持。
+  - （如果你有需要，请开启一个“issue”）。
+- 目前还没有设计用于向后兼容性（没有适当的版本控制）。
+  - 因此目前还不真正适合存档目的。
+- 目前作为“后端”实现，以避免向`Plots.jl`添加依赖项。
 
-Primary author: MA Laforge (@ma-laforge)
+主要作者：MA Laforge (@ma-laforge)
 
 ---
 
-# Deprecated backends
+# 已弃用的后端
 
 ### [PyPlot](https://github.com/stevengj/PyPlot.jl)
 
-`matplotlib` based backend, using `PyCall.jl` and `PyPlot.jl`. Superseded by `PythonCall.jl` and `PythonPlot.jl`.
-Whilst still supported in `Plots 1.X`, users are advised to transition to the `pythonplot` backend.
+基于`matplotlib`的后端，使用`PyCall.jl`和`PyPlot.jl`。被`PythonCall.jl`和`PythonPlot.jl`取代。
+虽然在`Plots 1.X`中仍然支持，但建议用户过渡到`pythonplot`后端。
 
 ### [PGFPlots](https://github.com/sisl/PGFPlots.jl)
 
-LaTeX plotting, based on PGF/TikZ.
+基于PGF/TikZ的LaTeX绘图。
 
-!!! tip
-    To add save a standalone .tex file including a preamble use attribute `tex_output_standalone = true` in your `plot` command.
+!!! 提示
+    要添加保存一个包含前导词的独立.tex文件，请在您的`plot`命令中使用属性`tex_output_standalone = true`。
 
-Pros:
+优点：
 
-- Nice looking plots
-- Lots of functionality (though the code is still WIP)
+- 美观的图表
+- 大量的功能（尽管代码仍在开发中）
 
-Cons:
+缺点：
 
-- Tricky to install
-- Heavy-weight dependencies
+- 安装困难
+- 重量级依赖项
 
-Authors:
+作者：
 
 - PGFPlots: Christian Feuersanger
-- PGFPlots.jl: Mykel Kochenderfer (@mykelk),  Louis Dressel (@dressel), and others
-- Plots <--> PGFPlots link code: Patrick Kofod Mogensen (@pkofod)
+- PGFPlots.jl: Mykel Kochenderfer (@mykelk)，Louis Dressel (@dressel)，以及其他人
+- Plots <--> PGFPlots链接代码：Patrick Kofod Mogensen (@pkofod)
 
 
 ### [Gadfly](https://github.com/dcjones/Gadfly.jl)
 
-A Julia implementation inspired by the "Grammar of Graphics".
+受"Grammar of Graphics"启发的Julia实现。
 
-Pros:
+优点：
 
-- Clean look
-- Lots of features
-- Flexible when combined with Compose.jl (inset plots, etc.)
+- 清晰的外观
+- 大量的功能
+- 与Compose.jl结合时灵活（内嵌图等）
 
-Cons:
+缺点：
 
-- Does not support 3D
-- Slow time-to-first-plot
-- Lots of dependencies
-- No interactivity
+- 不支持3D
+- 首次绘图时间较长
+- 大量的依赖项
+- 没有交互性
 
-Primary author: Daniel C Jones
+主要作者：Daniel C Jones
 
 ### [Immerse](https://github.com/JuliaGraphics/Immerse.jl)
 
-Built on top of Gadfly, Immerse adds some interactivity and a standalone GUI window, including zoom/pan and a cool "point lasso" tool to save Julia vectors with the selected data points.
+基于Gadfly，Immerse添加了一些交互性和独立的GUI窗口，包括缩放/平移和一个很酷的"点套索"工具，用来保存选择的数据点的Julia向量。
 
-Pros:
+优点：
 
-- Same as Gadfly
-- Interactivity
-- Standalone or inline
-- Lasso functionality
+- 与Gadfly相同
+- 交互性
+- 独立或内联
+- 套索功能
 
-Cons:
+缺点：
 
-- Same as Gadfly
+- 与Gadfly相同
 
-Primary author: Tim Holy
+主要作者：Tim Holy
 
 ### [Qwt](https://github.com/tbreloff/Qwt.jl)
 
-My package which wraps PyQwt.  Similar to PyPlot, it uses PyCall to convert calls to python.  Though Qwt.jl was the "first draft" of Plots, the functionality is superceded by other backends, and it's not worth my time to maintain.
+我的包，包装PyQwt。与PyPlot类似，它使用PyCall将调用转换为python。虽然Qwt.jl是Plots的"初稿"，但其功能被其他后端超越，而且我没有时间去维护。
 
-Primary author: Thomas Breloff
+主要作者：Thomas Breloff
 
 ### [Bokeh](https://github.com/bokeh/Bokeh.jl)
 
-Unfinished, but very similar to PlotlyJS... use that instead.
+未完成，但非常类似于PlotlyJS... 使用那个代替。
 
 ### [Winston](https://github.com/nolta/Winston.jl)
 
-Functionality incomplete... I never finished wrapping it, and I don't think it offers anything beyond other backends.  However, the plots are clean looking and it's relatively fast.
+功能不完整...我从未完成过它的包装，我不认为它提供了超越其他后端的任何东西。然而，图表看起来很干净，而且相对较快。
 
 ---

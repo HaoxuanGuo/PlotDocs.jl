@@ -1,64 +1,64 @@
-### Basic Concepts
+### 基本概念
 
-Use `plot` to create a new plot object, and `plot!` to add to an existing one:
+使用 `plot` 创建一个新的绘图对象，使用 `plot!` 向现有的绘图对象添加内容：
 
 ```julia
-plot(args...; kw...)                  # creates a new Plot, and set it to be the `current`
-plot!(args...; kw...)                 # modifies Plot `current()`
-plot!(plt, args...; kw...)            # modifies Plot `plt`
+plot(args...; kw...)                  # 创建一个新的 Plot，并将其设置为 `current`
+plot!(args...; kw...)                 # 修改 `current()` 的 Plot
+plot!(plt, args...; kw...)            # 修改 Plot `plt`
 ```
 
-The graphic is not shown implicitly, only when "displayed".  This will happen automatically when returned to a REPL prompt or to an IJulia cell.  There are [many other options](@ref output) as well.
+图形不会隐式显示，只有在"显示"时才会显示。当返回到 REPL 提示符或到 IJulia 单元格时，这将自动发生。还有[许多其他选项](@ref output)。
 
-Input arguments can take [many forms](@ref input-data).  Some valid examples:
+输入参数可以采取[许多形式](@ref input-data)。一些有效的例子：
 
 ```julia
-plot()                                       # empty Plot object
-plot(4)                                      # initialize with 4 empty series
-plot(rand(10))                               # 1 series... x = 1:10
-plot(rand(10,5))                             # 5 series... x = 1:10
-plot(rand(10), rand(10))                     # 1 series
-plot(rand(10,5), rand(10))                   # 5 series... y is the same for all
+plot()                                       # 空的 Plot 对象
+plot(4)                                      # 初始化 4 个空的序列
+plot(rand(10))                               # 1 个序列... x = 1:10
+plot(rand(10,5))                             # 5 个序列... x = 1:10
+plot(rand(10), rand(10))                     # 1 个序列
+plot(rand(10,5), rand(10))                   # 5 个序列... 所有 y 值相同
 plot(sin, rand(10))                          # y = sin.(x)
-plot(rand(10), sin)                          # same... y = sin.(x)
-plot([sin,cos], 0:0.1:π)                     # 2 series, sin.(x) and cos.(x)
-plot([sin,cos], 0, π)                        # sin and cos on the range [0, π]
-plot(1:10, Any[rand(10), sin])               # 2 series: rand(10) and map(sin,x)
-@df dataset("Ecdat", "Airline") plot(:Cost)  # the :Cost column from a DataFrame... must import StatsPlots
+plot(rand(10), sin)                          # 同样... y = sin.(x)
+plot([sin,cos], 0:0.1:π)                     # 2 个序列，sin.(x) 和 cos.(x)
+plot([sin,cos], 0, π)                        # 在范围 [0, π] 上的 sin 和 cos
+plot(1:10, Any[rand(10), sin])               # 2 个序列：rand(10) 和 map(sin,x)
+@df dataset("Ecdat", "Airline") plot(:Cost)  # DataFrame 中的 :Cost 列... 必须导入 StatsPlots
 ```
 
-[Keyword arguments](@ref attributes) allow for customization of the plot, subplots, axes, and series.  They follow consistent rules as much as possible, and you'll avoid common pitfalls if you read this section carefully:
+[关键字参数](@ref attributes) 允许自定义绘图，子绘图，轴和序列。他们尽可能地遵循一致的规则，如果你仔细阅读这一部分，你将避免常见的陷阱：
 
-- Many arguments have aliases which are [replaced during preprocessing](@ref step-1-replace-aliases).  `c` is the same as `color`, `m` is the same as `marker`, etc.  You can choose a verbosity that you are comfortable with.
-- There are some [special arguments](@ref step-2-handle-magic-arguments) which magically set many related things at once.
-- If the argument is a "matrix-type", then [each column will map to a series](@ref columns-are-series), cycling through columns if there are fewer columns than series.  In this sense, a vector is treated just like an "nx1 matrix".
-- Many arguments accept many different types... for example the color (also markercolor, fillcolor, etc) argument will accept strings or symbols with a color name, or any Colors.Colorant, or a ColorScheme, or a symbol representing a ColorGradient, or an AbstractVector of colors/symbols/etc...
+- 许多参数有别名，它们在预处理期间被[替换](@ref step-1-replace-aliases)。`c` 和 `color` 是一样的，`m` 和 `marker` 是一样的，等等。你可以选择你感到舒适的详细程度。
+- 有一些[特殊参数](@ref step-2-handle-magic-arguments)，它们可以一次性设置很多相关的内容。
+- 如果参数是 "矩阵类型"，那么[每一列将映射到一个序列](@ref columns-are-series)，如果列数少于序列数，则循环通过列。在这个意义上，向量就像一个 "nx1 矩阵" 一样被处理。
+- 许多参数接受许多不同的类型...例如，颜色（也包括 markercolor，fillcolor 等）参数将接受带有颜色名称的字符串或符号，或任何 Colors.Colorant，或 ColorScheme，或代表 ColorGradient 的符号，或颜色/符号等的 AbstractVector...
 
 ---
 
-### Useful Tips
+### 有用的提示
 
 !!! tip
-    A common error is to pass a Vector when you intend for each item to apply to only one series. Instead of an n-length Vector, pass a 1xn Matrix.
+    一个常见的错误是传递一个 Vector，而你打算让每一项只应用于一个序列。而不是传递一个 n 长度的 Vector，传递一个 1xn 的 Matrix。
 
 !!! tip
-    You can update certain plot settings after plot creation:
+    你可以在创建绘图后更新某些绘图设置：
     ```julia
     plot!(title = "New Title", xlabel = "New xlabel", ylabel = "New ylabel")
     plot!(xlims = (0, 5.5), ylims = (-2.2, 6), xticks = 0:0.5:10, yticks = [0,1,5,10])
 
-    # or using magic:
+    # 或使用 magic:
     plot!(xaxis = ("mylabel", :log10, :flip))
     xaxis!("mylabel", :log10, :flip)
     ```
 
 !!! tip
-    With [supported backends](@ref supported), you can pass a `Plots.Shape` object for the marker/markershape arguments. `Shape` takes a vector of 2-tuples in the constructor, defining the points of the polygon's shape in a unit-scaled coordinate space.  To make a square, for example, you could do: `Shape([(1,1),(1,-1),(-1,-1),(-1,1)])`
+    使用[支持的后端](@ref supported)，你可以为 marker/markershape 参数传递一个 `Plots.Shape` 对象。`Shape` 在构造函数中接受一个 2 元组的向量，定义了多边形形状在单位缩放坐标空间中的点。例如，你可以这样创建一个正方形：`Shape([(1,1),(1,-1),(-1,-1),(-1,1)])`
 
 !!! tip
-    You can see the default value for a given argument with `default(arg::Symbol)`, and set the default value with `default(arg::Symbol, value)` or `default(; kw...)`. For example set the default window size and whether we should show a legend with `default(size=(600,400), leg=false)`.
+    你可以使用 `default(arg::Symbol)` 查看给定参数的默认值，并使用 `default(arg::Symbol, value)` 或 `default(; kw...)` 设置默认值。例如，设置默认窗口大小和是否显示图例，可以使用 `default(size=(600,400), leg=false)`。
 
 !!! tip
-    Call `gui()` to display the plot in a window. Interactivity depends on backend. Plotting at the REPL (without semicolon) implicitly calls `gui()`.
+    调用 `gui()` 在窗口中显示绘图。交互性取决于后端。在 REPL 中绘图（没有分号）会隐式调用 `gui()`。
 
 ---

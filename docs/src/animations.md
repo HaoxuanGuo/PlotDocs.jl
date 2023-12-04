@@ -3,26 +3,26 @@ using Plots; gr()
 Plots.reset_defaults()
 ```
 
-### [Animations](@id animations)
+### [动画](@id animations)
 
-Animations are created in 3 steps:
+动画的创建分为3个步骤:
 
-- Initialize an `Animation` object.
-- Save each frame of the animation with `frame(anim)`.
-- Convert the frames to an animated gif with `gif(anim, filename, fps=15)`
+- 初始化一个 `Animation` 对象。
+- 使用 `frame(anim)` 保存动画的每一帧。
+- 使用 `gif(anim, filename, fps=15)` 将帧转换为动画gif。
 
 !!! tip
-    The convenience macros `@gif` and `@animate` simplify this code immensely.  See the [home page](@ref simple-is-beautiful) for examples of the short version, or the [gr example](@ref gr_demo_2) for the long version.
+    便捷宏 `@gif` 和 `@animate` 极大地简化了这段代码。请参阅 [主页](@ref simple-is-beautiful) 上的简短版本示例，或者 [gr 示例](@ref gr_demo_2) 的长版本。
 
 ---
 
-### Convenience macros
+### 便捷宏
 
-There are two macros for varying levels of convenience in creating animations: `@animate` and `@gif`.  The main difference is that `@animate` will return an `Animation` object for later processing, and `@gif` will create an animated gif file (and display it when returned to an IJulia cell).
+有两种宏可以在不同级别的便利性中创建动画：`@animate` 和 `@gif`。主要的区别是 `@animate` 将返回一个 `Animation` 对象以供稍后处理，而 `@gif` 将创建一个动画gif文件（并在返回到 IJulia 单元时显示它）。
 
-Use `@gif` for simple, one-off animations that you want to view immediately.  Use `@animate` for anything more complex.  Constructing `Animation` objects can be done when you need full control of the life-cycle of the animation (usually unnecessary though).
+对于您想要立即查看的简单的一次性动画，请使用 `@gif`。对于任何更复杂的内容，请使用 `@animate`。当您需要完全控制动画的生命周期时（虽然通常不必要），可以构造 `Animation` 对象。
 
-Examples:
+示例：
 
 ```@example animations
 using Plots
@@ -54,7 +54,7 @@ gif(anim, "anim_fps15.gif", fps = 15)
 gif(anim, "anim_fps30.gif", fps = 30)
 ```
 
-The `every` flag will only save a frame "every N iterations":
+`every` 标志只会在 "每N次迭代" 时保存一帧:
 
 ```@example animations
 @gif for i ∈ 1:n
@@ -62,7 +62,7 @@ The `every` flag will only save a frame "every N iterations":
 end every 5
 ```
 
-The `when` flag will only save a frame "when the expression is true"
+`when` 标志只会在 "表达式为真时" 保存一帧
 
 ```@example animations
 n = 400

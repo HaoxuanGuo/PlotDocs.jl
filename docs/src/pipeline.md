@@ -21,7 +21,7 @@ x, y = range(0, 1, length = n), randn(n, 3)
 我们想要将 `x` 与 `y` 的每一列进行可视化。这是在 Plots 中的一个样本命令：
 
 ```@example pipeline
-使用 Plots; pythonplot(size = (400, 300))
+using Plots; pythonplot(size = (400, 300))
 plot(
     x, y,
     line = (0.5, [4 1 0], [:path :scatter :histogram]),
